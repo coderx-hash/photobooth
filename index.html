@@ -102,12 +102,17 @@
 
         /* --- CAMERA AREA --- */
         .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; }
+        
+        .live-controls { display: flex; gap: 15px; margin-bottom: 20px; width: 100%; justify-content: center; }
+        .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 250px; }
+
         .video-wrapper { position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s; max-height: 65vh; }
         
         .video-wrapper.landscape { aspect-ratio: 4/3; }
         .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 450px; margin: 0 auto; } 
 
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        /* Tinanggal ko yung auto scaleX(-1) dito para ma-control sa JS depende kung front o back cam */
+        video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
         
         /* MOVABLE & RESIZABLE OVERLAY CSS */
@@ -115,10 +120,10 @@
             position: absolute; 
             top: 50%; 
             left: 50%; 
-            transform: translate(-50%, -50%); /* Centered scaling and moving */
+            transform: translate(-50%, -50%); 
             width: 100%; 
             height: auto; 
-            pointer-events: auto; /* Allows dragging */
+            pointer-events: auto; 
             cursor: grab; 
             z-index: 10; 
         }
@@ -153,17 +158,11 @@
     <div id="setup-screen" class="screen">
         <div class="title-container">
             <h1 class="title">PRIME DUO</h1>
-            <p class="subtitle">Design your perfect shot</p>
+            <p class="subtitle">Select your frame design</p>
         </div>
         
         <div class="setup-container">
-            <div class="section-label">1. Choose Orientation</div>
-            <div class="smart-grid">
-                <div class="card active" onclick="selectOrientation('landscape')" id="ori-landscape"><span class="icon">🖥️</span><p>Landscape</p></div>
-                <div class="card" onclick="selectOrientation('portrait')" id="ori-portrait"><span class="icon">📱</span><p>Portrait</p></div>
-            </div>
-
-            <div class="section-label">2. Select Overlay Frame</div>
+            <div class="section-label">Select Overlay Frame</div>
             <div class="smart-grid" id="frame-selection">
                 <div class="card active frame-option" onclick="selectFrame('none', this)" id="frame-none"><span class="icon">🚫</span><p>No Frame</p></div>
                 <label class="card upload-card frame-option" for="customFrameUpload">
@@ -182,6 +181,11 @@
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">STRIKE A POSE</h1>
             </div>
             
+            <div class="live-controls" id="live-controls">
+                <button class="btn btn-secondary" onclick="toggleOrientation()">🔄 Rotate</button>
+                <button class="btn btn-secondary" onclick="toggleCamera()">📷 Flip Cam</button>
+            </div>
+
             <div class="video-wrapper landscape" id="vid-wrapper">
                 <video id="camera" playsinline autoplay></video>
                 <img id="live-overlay" class="frame-overlay" src="" style="display:none;" draggable="false">
@@ -245,9 +249,11 @@
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
+        // State variables
         window.config = { orientation: 'landscape', frameSrc: null };
         let streamActive = null;
         let currentPhotoDataUrl = null;
+        let currentFacingMode = "user"; // Default to front camera
 
         // Elements
         const video = document.getElementById('camera');
@@ -260,6 +266,7 @@
         const countdownEl = document.getElementById('countdown');
         const flashEl = document.getElementById('flash');
         const boothControls = document.getElementById('booth-controls');
+        const liveControls = document.getElementById('live-controls');
 
         // --- OVERLAY RESIZE SLIDER ---
         document.getElementById('overlaySize').addEventListener('input', function(e) {
@@ -283,7 +290,7 @@
 
             const dragMove = (e) => {
                 if (!isDragging) return;
-                e.preventDefault(); // Prevents page scroll when dragging
+                e.preventDefault(); 
                 let currentX, currentY;
                 if (e.type === "touchmove") { currentX = e.touches[0].clientX; currentY = e.touches[0].clientY; }
                 else { currentX = e.clientX; currentY = e.clientY; }
@@ -305,23 +312,13 @@
             document.addEventListener('touchend', dragEnd);
         }
         
-        // Initialize dragging for the overlay
         makeOverlayDraggable(overlayImg);
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION & SETTINGS ---
         window.switchScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        window.selectOrientation = (type) => {
-            config.orientation = type;
-            document.getElementById('ori-landscape').classList.remove('active');
-            document.getElementById('ori-portrait').classList.remove('active');
-            document.getElementById(`ori-${type}`).classList.add('active');
-            vidWrapper.className = `video-wrapper ${type}`;
-            previewWrapper.className = `video-wrapper ${type}`;
         };
 
         window.selectFrame = (srcUrl, cardElement) => {
@@ -354,12 +351,49 @@
             }
         });
 
-        // --- CAMERA ---
+        // --- LIVE CAMERA CONTROLS ---
+        window.toggleOrientation = () => {
+            config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
+            vidWrapper.className = `video-wrapper ${config.orientation}`;
+            previewWrapper.className = `video-wrapper ${config.orientation}`;
+        };
+
+        window.toggleCamera = async () => {
+            currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+            if (streamActive) streamActive.getTracks().forEach(track => track.stop());
+            await startVideoStream();
+        };
+
+        async function startVideoStream() {
+            try {
+                // Requesting highest possible resolution (4K target) to ensure high res output
+                const constraints = { 
+                    video: { 
+                        facingMode: currentFacingMode, 
+                        width: { ideal: 3840 }, 
+                        height: { ideal: 2160 } 
+                    } 
+                };
+                streamActive = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = streamActive;
+
+                // Fix Mirroring: Naka-mirror lang kung naka-front cam
+                if (currentFacingMode === "user") {
+                    video.style.transform = "scaleX(-1)";
+                } else {
+                    video.style.transform = "scaleX(1)";
+                }
+            } catch (err) { 
+                alert("Camera access denied or unavailable. Please check browser permissions."); 
+                console.error(err);
+            }
+        }
+
         window.openCamera = async () => {
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
+            liveControls.style.display = 'flex';
 
-            // Setup Overlay Display & Reset Position
             if (config.frameSrc) {
                 overlayImg.src = config.frameSrc;
                 overlayImg.style.display = 'block';
@@ -373,12 +407,7 @@
                 document.getElementById('overlay-controls').style.display = 'none';
             }
 
-            try {
-                // High Res Request
-                const constraints = { video: { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } } };
-                streamActive = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = streamActive;
-            } catch (err) { alert("Camera access denied or unavailable. Please check browser permissions."); }
+            await startVideoStream();
         };
 
         window.endSession = () => {
@@ -395,19 +424,20 @@
             setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
-        // --- SNAP & EXACT RENDER (WYSIWYG) ---
+        // --- SNAP & EXACT RENDER (HIGH RESOLUTION) ---
         window.startCapture = async () => {
             boothControls.style.display = 'none';
+            liveControls.style.display = 'none';
             document.getElementById('overlay-controls').style.display = 'none';
             await playCountdown();
             
-            // High Resolution Settings
+            // Mas pinalaking resolution para sa High-Res output (4.3 Megapixels)
             if (config.orientation === 'landscape') { 
-                tempCanvas.width = 1600; 
-                tempCanvas.height = 1200; 
+                tempCanvas.width = 2400; 
+                tempCanvas.height = 1800; 
             } else { 
-                tempCanvas.width = 1200; 
-                tempCanvas.height = 1600; 
+                tempCanvas.width = 1800; 
+                tempCanvas.height = 2400; 
             }
             
             const canvasW = tempCanvas.width;
@@ -415,7 +445,6 @@
             const videoW = video.videoWidth;
             const videoH = video.videoHeight;
             
-            // Exact "object-fit: cover" center crop match
             const scale = Math.max(canvasW / videoW, canvasH / videoH);
             const drawW = videoW * scale;
             const drawH = videoH * scale;
@@ -423,12 +452,14 @@
             const startY = (canvasH - drawH) / 2;
 
             tempCtx.save();
-            tempCtx.translate(canvasW, 0);
-            tempCtx.scale(-1, 1);
+            // Mirror lang sa canvas kung front cam gamit para tama yung render ng photo
+            if (currentFacingMode === "user") {
+                tempCtx.translate(canvasW, 0);
+                tempCtx.scale(-1, 1);
+            }
             tempCtx.drawImage(video, startX, startY, drawW, drawH);
             tempCtx.restore();
 
-            // Perfect Resize & Placement Logic for Custom PNG Overlay
             if (config.frameSrc) {
                 const img = new Image();
                 img.src = config.frameSrc;
@@ -440,14 +471,12 @@
                 const scaleX = canvasW / wrapperRect.width;
                 const scaleY = canvasH / wrapperRect.height;
 
-                // Hanapin kung saan exactly ang center ng image inside the wrapper box
                 const centerX = elRect.left + (elRect.width / 2);
                 const centerY = elRect.top + (elRect.height / 2);
 
                 const relativeX = centerX - wrapperRect.left;
                 const relativeY = centerY - wrapperRect.top;
 
-                // Scale up sa size ng High-Res canvas
                 const finalX = relativeX * scaleX;
                 const finalY = relativeY * scaleY;
                 const imgDrawW = elRect.width * scaleX;
@@ -456,6 +485,7 @@
                 tempCtx.drawImage(img, finalX - (imgDrawW / 2), finalY - (imgDrawH / 2), imgDrawW, imgDrawH);
             }
             
+            // Set to 1.0 (100% quality) para i-retain ang high resolution
             currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); 
             previewImg.src = currentPhotoDataUrl;
             switchScreen('preview-screen');
@@ -466,6 +496,7 @@
             previewImg.src = "";
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
+            liveControls.style.display = 'flex';
             if(config.frameSrc) document.getElementById('overlay-controls').style.display = 'block';
         };
 
