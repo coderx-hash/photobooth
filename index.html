@@ -100,18 +100,32 @@
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
         .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5); transform: translateY(-3px); border-color: var(--danger);}
 
+        /* Styling for select dropdown */
+        select.btn {
+            appearance: none;
+            -webkit-appearance: none;
+            text-align: center;
+            text-align-last: center;
+            outline: none;
+            cursor: pointer;
+        }
+        select.btn option {
+            background: var(--bg-dark);
+            color: var(--text-main);
+        }
+
         /* --- CAMERA AREA --- */
         .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; }
         
-        .live-controls { display: flex; gap: 15px; margin-bottom: 20px; width: 100%; justify-content: center; }
-        .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 250px; }
+        .live-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; width: 100%; justify-content: center; }
+        .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 200px; }
+        #camera-select { flex: 2; max-width: 300px; }
 
         .video-wrapper { position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s; max-height: 65vh; }
         
         .video-wrapper.landscape { aspect-ratio: 4/3; }
         .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 450px; margin: 0 auto; } 
 
-        /* Tinanggal ko yung auto scaleX(-1) dito para ma-control sa JS depende kung front o back cam */
         video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
         
@@ -183,7 +197,10 @@
             
             <div class="live-controls" id="live-controls">
                 <button class="btn btn-secondary" onclick="toggleOrientation()">🔄 Rotate</button>
-                <button class="btn btn-secondary" onclick="toggleCamera()">📷 Flip Cam</button>
+                <select id="camera-select" class="btn btn-secondary" onchange="changeCamera()">
+                    <option>Loading cameras...</option>
+                </select>
+                <button class="btn btn-secondary" onclick="toggleMirror()">🪞 Mirror</button>
             </div>
 
             <div class="video-wrapper landscape" id="vid-wrapper">
@@ -253,7 +270,8 @@
         window.config = { orientation: 'landscape', frameSrc: null };
         let streamActive = null;
         let currentPhotoDataUrl = null;
-        let currentFacingMode = "user"; // Default to front camera
+        let currentDeviceId = null;
+        let isMirrored = false; // Default: hindi naka-mirror (best for DSLR)
 
         // Elements
         const video = document.getElementById('camera');
@@ -267,6 +285,7 @@
         const flashEl = document.getElementById('flash');
         const boothControls = document.getElementById('booth-controls');
         const liveControls = document.getElementById('live-controls');
+        const cameraSelect = document.getElementById('camera-select');
 
         // --- OVERLAY RESIZE SLIDER ---
         document.getElementById('overlaySize').addEventListener('input', function(e) {
@@ -358,31 +377,74 @@
             previewWrapper.className = `video-wrapper ${config.orientation}`;
         };
 
-        window.toggleCamera = async () => {
-            currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
-            if (streamActive) streamActive.getTracks().forEach(track => track.stop());
-            await startVideoStream();
+        window.toggleMirror = () => {
+            isMirrored = !isMirrored;
+            applyMirror();
         };
 
-        async function startVideoStream() {
+        function applyMirror() {
+            if (isMirrored) {
+                video.style.transform = "scaleX(-1)";
+            } else {
+                video.style.transform = "scaleX(1)";
+            }
+        }
+
+        async function getCameras() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            cameraSelect.innerHTML = '';
+            videoDevices.forEach((device, index) => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
+
+            if (currentDeviceId) {
+                cameraSelect.value = currentDeviceId;
+            } else if (videoDevices.length > 0) {
+                currentDeviceId = videoDevices[0].deviceId;
+                cameraSelect.value = currentDeviceId;
+            }
+        }
+
+        window.changeCamera = async () => {
+            currentDeviceId = cameraSelect.value;
+            await startVideoStream(currentDeviceId);
+        };
+
+        async function startVideoStream(deviceId = null) {
+            if (streamActive) streamActive.getTracks().forEach(track => track.stop());
+            
+            // Request 4K target to make sure we get the highest res your DSLR/Webcam offers
+            const constraints = { 
+                video: { 
+                    width: { ideal: 3840 }, 
+                    height: { ideal: 2160 } 
+                } 
+            };
+
+            if (deviceId) {
+                constraints.video.deviceId = { exact: deviceId };
+            } else {
+                // Default fallback if no device specified
+                constraints.video.facingMode = "environment"; 
+            }
+
             try {
-                // Requesting highest possible resolution (4K target) to ensure high res output
-                const constraints = { 
-                    video: { 
-                        facingMode: currentFacingMode, 
-                        width: { ideal: 3840 }, 
-                        height: { ideal: 2160 } 
-                    } 
-                };
                 streamActive = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = streamActive;
 
-                // Fix Mirroring: Naka-mirror lang kung naka-front cam
-                if (currentFacingMode === "user") {
-                    video.style.transform = "scaleX(-1)";
-                } else {
-                    video.style.transform = "scaleX(1)";
-                }
+                // Update the current device ID based on what the browser actually used
+                const track = streamActive.getVideoTracks()[0];
+                currentDeviceId = track.getSettings().deviceId;
+
+                // Update the dropdown list now that we have permissions
+                await getCameras();
+                applyMirror();
+
             } catch (err) { 
                 alert("Camera access denied or unavailable. Please check browser permissions."); 
                 console.error(err);
@@ -431,7 +493,6 @@
             document.getElementById('overlay-controls').style.display = 'none';
             await playCountdown();
             
-            // Mas pinalaking resolution para sa High-Res output (4.3 Megapixels)
             if (config.orientation === 'landscape') { 
                 tempCanvas.width = 2400; 
                 tempCanvas.height = 1800; 
@@ -452,11 +513,13 @@
             const startY = (canvasH - drawH) / 2;
 
             tempCtx.save();
-            // Mirror lang sa canvas kung front cam gamit para tama yung render ng photo
-            if (currentFacingMode === "user") {
+            
+            // Check if user manually mirrored the camera, and reflect it on canvas
+            if (isMirrored) {
                 tempCtx.translate(canvasW, 0);
                 tempCtx.scale(-1, 1);
             }
+            
             tempCtx.drawImage(video, startX, startY, drawW, drawH);
             tempCtx.restore();
 
@@ -485,7 +548,6 @@
                 tempCtx.drawImage(img, finalX - (imgDrawW / 2), finalY - (imgDrawH / 2), imgDrawW, imgDrawH);
             }
             
-            // Set to 1.0 (100% quality) para i-retain ang high resolution
             currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); 
             previewImg.src = currentPhotoDataUrl;
             switchScreen('preview-screen');
