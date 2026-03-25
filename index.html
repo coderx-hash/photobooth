@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prime Duo Photobooth PRO</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat&family=Comic+Neue:wght@700&family=Dancing+Script:wght@700&family=Lobster&family=Montserrat:wght@700;900&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:ital,wght@1,700&family=Poppins:wght@400;600;800;900&family=Raleway:wght@800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;800;900&display=swap" rel="stylesheet">
     
     <style>
         /* --- GLOBAL VARIABLES --- */
@@ -102,7 +102,9 @@
 
         /* --- CAMERA AREA --- */
         .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; }
-        .video-wrapper { position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s; max-height: 60vh; }
+        .video-wrapper { position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s; max-height: 65vh; }
+        
+        /* EXACT ASPECT RATIOS para mag-match sa high res canvas size */
         .video-wrapper.landscape { aspect-ratio: 4/3; }
         .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 450px; margin: 0 auto; } 
 
@@ -110,75 +112,13 @@
         #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
         .frame-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 10; }
 
-        /* Draggable Text */
-        #text-overlay-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden; }
-        .draggable-text {
-            position: absolute; pointer-events: auto; cursor: grab; user-select: none;
-            white-space: nowrap; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.6));
-            padding: 5px; border: 2px dashed transparent; line-height: 1.2;
-            transform: translate(-50%, -50%); /* Centered dragging origin */
-        }
-        .draggable-text:active { cursor: grabbing; }
-        .draggable-text.active-element { border-color: var(--primary); background: rgba(255,255,255,0.1); border-radius: 8px;}
-
-        /* --- TEXT & EMOJI TOOLS --- */
-        .tools-wrapper {
-            width: 100%; max-width: 850px; background: rgba(255,255,255,0.03); 
-            border: 1px solid var(--glass-border); border-radius: 16px; 
-            padding: 15px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px;
-        }
-
-        /* Emoji Scroll Bar */
-        .emoji-row {
-            display: flex; align-items: center; gap: 10px; width: 100%;
-            background: rgba(0,0,0,0.3); border-radius: 12px; padding: 5px;
-        }
-        .emoji-btn-scroll { background: transparent; border: none; color: var(--primary); font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
-        .emoji-list {
-            display: flex; gap: 12px; overflow-x: auto; scroll-behavior: smooth; 
-            padding: 5px 0; flex: 1; -ms-overflow-style: none; scrollbar-width: none;
-        }
-        .emoji-list::-webkit-scrollbar { display: none; }
-        .emoji-item { font-size: 1.8rem; cursor: pointer; transition: transform 0.2s; user-select: none; }
-        .emoji-item:hover { transform: scale(1.3); }
-
-        /* Main Tools */
-        .text-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-        
-        .input-group { display: flex; flex: 1; min-width: 200px; gap: 10px; align-items: center; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 5px 15px; }
-        #customText { 
-            border: none; background: transparent; color: white; flex: 1; 
-            font-size: 1.2rem; outline: none; padding: 8px 0;
-            transition: font-size 0.2s, font-family 0.2s, color 0.2s;
-        }
-        
-        .tool-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center;}
-        
-        select { padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.8); color: white; cursor: pointer; font-size: 1rem; outline: none;}
-        select option { background: #000; color: #fff; }
-        
-        input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 8px; cursor: pointer; background: transparent; padding: 0; }
-        
-        /* Size Slider */
-        .size-slider-container { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 10px; }
-        .size-slider-container span { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
-        input[type="range"] { accent-color: var(--primary); cursor: pointer; width: 100px; }
-
-        .btn-small { padding: 12px 20px; font-size: 0.9rem; width: auto; border-radius: 10px; }
-
         /* Controls */
-        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 15px; justify-content: center; }
+        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 30px; justify-content: center; }
         .controls-row .btn { flex: 1 1 200px; }
 
         .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: clamp(6rem, 20vw, 15rem); font-weight: 900; color: white; text-shadow: 0px 10px 40px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20; }
         .flash { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 30; }
 
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); padding: 20px; }
-        .modal-box { background: var(--bg-dark); padding: 40px 30px; border-radius: 28px; border: 1px solid var(--glass-border); width: 100%; max-width: 400px; text-align: center; }
-        .modal-box h2 { margin-bottom: 5px; color: var(--text-main); font-size: 1.6rem; font-weight: 800; }
-        .modal-box input { width: 100%; padding: 18px; margin: 25px 0; border-radius: 16px; border: 2px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: white; font-size: 1.2rem; text-align: center; outline: none; }
-        .modal-box input:focus { border-color: var(--primary); background: rgba(245, 176, 0, 0.05); }
     </style>
 </head>
 <body>
@@ -220,58 +160,14 @@
     <div id="booth-screen" class="screen">
         <div class="camera-container">
             <div class="title-container" style="margin-bottom: 10px;">
-                <h1 class="title" style="font-size: clamp(1.5rem, 4vw, 2.5rem);">STRIKE A POSE</h1>
-                <p class="subtitle" style="margin-top:0;">Add text/emojis before snapping!</p>
+                <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">STRIKE A POSE</h1>
             </div>
             
             <div class="video-wrapper landscape" id="vid-wrapper">
                 <video id="camera" playsinline autoplay></video>
                 <img id="live-overlay" class="frame-overlay" src="" style="display:none;">
-                <div id="text-overlay-container"></div>
                 <div id="countdown" class="countdown-overlay">3</div>
                 <div id="flash" class="flash"></div>
-            </div>
-
-            <div class="tools-wrapper" id="tools-wrapper">
-                
-                <div class="emoji-row">
-                    <button class="emoji-btn-scroll" onclick="document.getElementById('emoji-list').scrollLeft -= 100">◀</button>
-                    <div class="emoji-list" id="emoji-list">
-                        </div>
-                    <button class="emoji-btn-scroll" onclick="document.getElementById('emoji-list').scrollLeft += 100">▶</button>
-                </div>
-
-                <div class="text-tools">
-                    <div class="input-group">
-                        <input type="color" id="textColor" value="#ffffff" oninput="updateLiveStyles()">
-                        <input type="text" id="customText" placeholder="Type here..." oninput="updateLiveStyles()">
-                    </div>
-                    
-                    <div class="tool-controls">
-                        <select id="textFont" onchange="updateLiveStyles()">
-                            <option value="'Poppins', sans-serif" style="font-family: 'Poppins', sans-serif;">Poppins</option>
-                            <option value="'Bebas Neue', cursive" style="font-family: 'Bebas Neue', cursive;">Bebas Neue</option>
-                            <option value="'Pacifico', cursive" style="font-family: 'Pacifico', cursive;">Pacifico</option>
-                            <option value="'Lobster', cursive" style="font-family: 'Lobster', cursive;">Lobster</option>
-                            <option value="'Dancing Script', cursive" style="font-family: 'Dancing Script', cursive;">Dancing Script</option>
-                            <option value="'Caveat', cursive" style="font-family: 'Caveat', cursive;">Caveat</option>
-                            <option value="'Comic Neue', cursive" style="font-family: 'Comic Neue', cursive;">Comic Neue</option>
-                            <option value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif;">Montserrat</option>
-                            <option value="'Oswald', sans-serif" style="font-family: 'Oswald', sans-serif;">Oswald</option>
-                            <option value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif;">Playfair</option>
-                        </select>
-                        
-                        <div class="size-slider-container">
-                            <span>Size</span>
-                            <input type="range" id="textSize" min="20" max="150" value="50" oninput="updateLiveStyles()">
-                        </div>
-
-                        <button class="btn btn-primary btn-small" onclick="addTextToCanvas()">➕ Add</button>
-                    </div>
-                </div>
-                <small style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">
-                    *Double-tap added text to delete. Click added text to edit its size/color.
-                </small>
             </div>
 
             <div class="controls-row" id="booth-controls">
@@ -304,20 +200,7 @@
             <p id="uploadStatus" class="subtitle" style="font-size: clamp(1rem, 3vw, 1.3rem);">Saving securely to the cloud...</p>
         </div>
         <div id="success-buttons" class="controls-row" style="display:none; justify-content: center;">
-            <button class="btn btn-primary" onclick="showPasswordModal()" style="max-width: 350px;">✨ New Session</button>
-        </div>
-    </div>
-
-    <div id="pass-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h2>Admin Access</h2>
-            <p style="font-size: 0.95rem; color: var(--text-muted);">Enter password to unlock.</p>
-            <input type="password" id="sessionPassword" placeholder="Password...">
-            <div style="display: flex; gap: 12px; flex-direction: column;">
-                <button class="btn btn-primary" onclick="verifyPassword()">Unlock</button>
-                <button class="btn btn-secondary" onclick="closePasswordModal()" style="border: none;">Cancel</button>
-            </div>
-            <p id="passError" style="color: var(--danger); display: none; margin-top: 15px; font-weight: 600; font-size: 0.9rem;">Incorrect password!</p>
+            <button class="btn btn-primary" onclick="startNewSession()" style="max-width: 350px;">✨ New Session</button>
         </div>
     </div>
 
@@ -325,6 +208,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDrTbjnBeyNTQZU3hkaGfnXESvOKaQBIKk",
             authDomain: "photobooth-d94d3.firebaseapp.com",
@@ -339,7 +223,6 @@
         window.config = { orientation: 'landscape', frameSrc: null };
         let streamActive = null;
         let currentPhotoDataUrl = null;
-        let activeDraggable = null; // Tracks which text is currently selected
 
         // Elements
         const video = document.getElementById('camera');
@@ -352,22 +235,6 @@
         const countdownEl = document.getElementById('countdown');
         const flashEl = document.getElementById('flash');
         const boothControls = document.getElementById('booth-controls');
-        const textContainer = document.getElementById('text-overlay-container');
-        const customTextInput = document.getElementById('customText');
-
-        // --- POPULATE EMOJIS ---
-        const emojis = ["😂","😍","🔥","✨","🎉","😎","❤️","💯","👑","🎂","🥳","💍","🍻","📸","✌️","🫶","🤪","🦋","⭐","🎈","🍾","👽","👻","🍕","🍟","🍩"];
-        const emojiListEl = document.getElementById('emoji-list');
-        emojis.forEach(emo => {
-            const span = document.createElement('span');
-            span.className = 'emoji-item';
-            span.innerText = emo;
-            span.onclick = () => {
-                customTextInput.value += emo; // Add emoji to input box
-                updateLiveStyles();
-            };
-            emojiListEl.appendChild(span);
-        });
 
         // --- NAVIGATION ---
         window.switchScreen = (screenId) => {
@@ -418,149 +285,10 @@
             }
         });
 
-        // --- LIVE PREVIEW & RESIZING LOGIC ---
-        window.updateLiveStyles = () => {
-            const size = document.getElementById('textSize').value + 'px';
-            const font = document.getElementById('textFont').value;
-            const color = document.getElementById('textColor').value;
-
-            // 1. Update the input field live preview
-            customTextInput.style.fontFamily = font;
-            customTextInput.style.color = color;
-
-            // 2. If an element is selected on the screen, update it live too
-            if (activeDraggable) {
-                activeDraggable.style.fontSize = size;
-                activeDraggable.style.fontFamily = font;
-                activeDraggable.style.color = color;
-                
-                // Keep input text in sync if they are typing while selected
-                if(document.activeElement === customTextInput) {
-                    activeDraggable.innerText = customTextInput.value;
-                }
-            }
-        };
-
-        // Deselect text when clicking the video background
-        vidWrapper.addEventListener('click', (e) => {
-            if(e.target === video || e.target === overlayImg || e.target === textContainer) {
-                clearSelection();
-            }
-        });
-
-        function clearSelection() {
-            if(activeDraggable) activeDraggable.classList.remove('active-element');
-            activeDraggable = null;
-            customTextInput.value = ''; // Reset input for new text
-            document.getElementById('textSize').value = 50; // Reset slider
-        }
-
-        window.addTextToCanvas = () => {
-            const textInput = customTextInput.value;
-            if (!textInput.trim()) return;
-
-            const color = document.getElementById('textColor').value;
-            const font = document.getElementById('textFont').value;
-            const size = document.getElementById('textSize').value + 'px';
-
-            const textEl = document.createElement('div');
-            textEl.className = 'draggable-text';
-            textEl.innerText = textInput;
-            textEl.style.color = color;
-            textEl.style.fontFamily = font;
-            textEl.style.fontSize = size;
-            
-            // Spawn in center
-            textEl.style.top = '50%';
-            textEl.style.left = '50%';
-            
-            // Select it upon clicking
-            textEl.addEventListener('mousedown', () => selectElement(textEl));
-            textEl.addEventListener('touchstart', () => selectElement(textEl), {passive: true});
-
-            // Delete on double tap
-            textEl.addEventListener('dblclick', () => { 
-                if(activeDraggable === textEl) clearSelection();
-                textEl.remove(); 
-            });
-            
-            makeDraggable(textEl);
-            textContainer.appendChild(textEl);
-            
-            selectElement(textEl); // Auto select new item
-        };
-
-        function selectElement(el) {
-            if(activeDraggable) activeDraggable.classList.remove('active-element');
-            activeDraggable = el;
-            el.classList.add('active-element');
-            
-            // Sync controls to the selected element
-            customTextInput.value = el.innerText;
-            document.getElementById('textSize').value = parseFloat(window.getComputedStyle(el).fontSize);
-            
-            // RGB to Hex for color picker sync
-            const rgb = window.getComputedStyle(el).color;
-            const hex = rgbToHex(rgb);
-            if(hex) document.getElementById('textColor').value = hex;
-            
-            // Try to sync font (optional, exact matching can be tricky)
-            const fontFamily = window.getComputedStyle(el).fontFamily;
-            Array.from(document.getElementById('textFont').options).forEach(opt => {
-                if(fontFamily.includes(opt.value.split(',')[0].replace(/'/g, ""))) {
-                    document.getElementById('textFont').value = opt.value;
-                }
-            });
-        }
-
-        function rgbToHex(rgb) {
-            const result = rgb.match(/\d+/g);
-            if(!result || result.length < 3) return null;
-            return "#" + ((1 << 24) + (parseInt(result[0]) << 16) + (parseInt(result[1]) << 8) + parseInt(result[2])).toString(16).slice(1);
-        }
-
-        // Dragging Logic
-        function makeDraggable(el) {
-            let isDragging = false, startX, startY, initialX, initialY;
-
-            const dragStart = (e) => {
-                isDragging = true;
-                if (e.type === "touchstart") { startX = e.touches[0].clientX; startY = e.touches[0].clientY; } 
-                else { startX = e.clientX; startY = e.clientY; }
-                initialX = el.offsetLeft; initialY = el.offsetTop;
-            };
-
-            const dragMove = (e) => {
-                if (!isDragging) return;
-                e.preventDefault(); 
-                let currentX, currentY;
-                if (e.type === "touchmove") { currentX = e.touches[0].clientX; currentY = e.touches[0].clientY; } 
-                else { currentX = e.clientX; currentY = e.clientY; }
-
-                let newX = initialX + (currentX - startX);
-                let newY = initialY + (currentY - startY);
-
-                el.style.left = `${newX}px`;
-                el.style.top = `${newY}px`;
-            };
-
-            const dragEnd = () => { isDragging = false; };
-
-            el.addEventListener('mousedown', dragStart);
-            el.addEventListener('touchstart', dragStart, {passive: false});
-            document.addEventListener('mousemove', dragMove);
-            document.addEventListener('touchmove', dragMove, {passive: false});
-            document.addEventListener('mouseup', dragEnd);
-            document.addEventListener('touchend', dragEnd);
-        }
-
         // --- CAMERA ---
         window.openCamera = async () => {
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
-            document.getElementById('tools-wrapper').style.display = 'flex';
-            textContainer.innerHTML = ''; 
-            clearSelection();
 
             if (config.frameSrc) {
                 overlayImg.src = config.frameSrc;
@@ -570,7 +298,8 @@
             }
 
             try {
-                const constraints = { video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } } };
+                // Pinilit natin kumuha ng pinaka malinaw (1080p High Res)
+                const constraints = { video: { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } } };
                 streamActive = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = streamActive;
             } catch (err) { alert("Camera access denied or unavailable. Please check browser permissions."); }
@@ -590,67 +319,53 @@
             setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
-        // --- SNAP & RENDER ---
+        // --- SNAP & EXACT RENDER (WYSIWYG) ---
         window.startCapture = async () => {
-            clearSelection(); // Remove borders before snapshot
             boothControls.style.display = 'none';
-            document.getElementById('tools-wrapper').style.display = 'none';
             await playCountdown();
             
-            if (config.orientation === 'landscape') { tempCanvas.width = 1200; tempCanvas.height = 900; } 
-            else { tempCanvas.width = 900; tempCanvas.height = 1200; }
+            // TINAASAN ANG RESOLUTION (High Res: 1600x1200 or 1200x1600)
+            if (config.orientation === 'landscape') { 
+                tempCanvas.width = 1600; 
+                tempCanvas.height = 1200; 
+            } else { 
+                tempCanvas.width = 1200; 
+                tempCanvas.height = 1600; 
+            }
             
+            const canvasW = tempCanvas.width;
+            const canvasH = tempCanvas.height;
+            const videoW = video.videoWidth;
+            const videoH = video.videoHeight;
+            
+            // Exact "object-fit: cover" math para sa canvas 
+            // Wala ng squish, wala ng shrink!
+            const scale = Math.max(canvasW / videoW, canvasH / videoH);
+            const drawW = videoW * scale;
+            const drawH = videoH * scale;
+            
+            // I-center crop gaya sa HTML
+            const startX = (canvasW - drawW) / 2;
+            const startY = (canvasH - drawH) / 2;
+
             tempCtx.save();
-            tempCtx.translate(tempCanvas.width, 0);
+            // Mirror image handling
+            tempCtx.translate(canvasW, 0);
             tempCtx.scale(-1, 1);
-            tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Draw cropped video exactly as seen in preview
+            tempCtx.drawImage(video, startX, startY, drawW, drawH);
             tempCtx.restore();
 
+            // Draw Overlay PNG
             if (config.frameSrc) {
                 const img = new Image();
                 img.src = config.frameSrc;
                 await new Promise(r => { img.onload = r; });
-                tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.drawImage(img, 0, 0, canvasW, canvasH);
             }
-
-            const wrapperRect = vidWrapper.getBoundingClientRect();
-            const scaleX = tempCanvas.width / wrapperRect.width;
-            const scaleY = tempCanvas.height / wrapperRect.height;
-
-            document.querySelectorAll('.draggable-text').forEach(el => {
-                const elRect = el.getBoundingClientRect();
-                
-                // Account for the transform: translate(-50%, -50%) in CSS
-                const centerX = elRect.left + (elRect.width / 2);
-                const centerY = elRect.top + (elRect.height / 2);
-
-                const relativeX = centerX - wrapperRect.left;
-                const relativeY = centerY - wrapperRect.top;
-
-                const finalX = relativeX * scaleX;
-                const finalY = relativeY * scaleY;
-
-                const computedStyle = window.getComputedStyle(el);
-                const fontSize = parseFloat(computedStyle.fontSize);
-                const finalFontSize = fontSize * scaleY; 
-
-                tempCtx.font = `${finalFontSize}px ${computedStyle.fontFamily}`;
-                tempCtx.fillStyle = computedStyle.color;
-                
-                // Align center to match HTML translation
-                tempCtx.textAlign = 'center';
-                tempCtx.textBaseline = 'middle';
-                
-                tempCtx.shadowColor = 'rgba(0,0,0,0.6)';
-                tempCtx.shadowBlur = 4 * scaleY;
-                tempCtx.shadowOffsetX = 2 * scaleX;
-                tempCtx.shadowOffsetY = 2 * scaleY;
-
-                tempCtx.fillText(el.innerText, finalX, finalY);
-                tempCtx.shadowColor = 'transparent'; // Reset
-            });
             
-            currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
+            currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); // 1.0 Maximum Quality
             previewImg.src = currentPhotoDataUrl;
             switchScreen('preview-screen');
         };
@@ -660,7 +375,6 @@
             previewImg.src = "";
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
-            document.getElementById('tools-wrapper').style.display = 'flex';
         };
 
         window.savePhoto = async () => {
@@ -694,18 +408,12 @@
             }
         };
 
-        const ACTUAL_PASSWORD = "PRIME2026";
-        window.showPasswordModal = () => { document.getElementById('pass-modal').style.display = 'flex'; document.getElementById('sessionPassword').value = ''; document.getElementById('passError').style.display = 'none'; };
-        window.closePasswordModal = () => { document.getElementById('pass-modal').style.display = 'none'; };
-        window.verifyPassword = () => {
-            if (document.getElementById('sessionPassword').value === ACTUAL_PASSWORD) {
-                closePasswordModal();
-                currentPhotoDataUrl = null;
-                endSession(); 
-            } else { 
-                document.getElementById('passError').style.display = 'block'; 
-            }
+        // Direktang babalik sa Start / Setup screen nang walang password
+        window.startNewSession = () => {
+            currentPhotoDataUrl = null;
+            endSession();
         };
+
     </script>
 </body>
 </html>
