@@ -3,29 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Photo Booth</title>
+    <title>Prime Duo Photobooth</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; }
-        .booth-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        video, canvas { border: 3px solid #333; border-radius: 10px; max-width: 100%; }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
-        button:hover { background-color: #218838; }
-        button:disabled { background-color: #cccccc; cursor: not-allowed; }
-        #qrcode { margin-top: 20px; padding: 10px; background: white; display: inline-block; border-radius: 10px; }
-        #statusText { font-weight: bold; color: #333; }
+        /* GLOBAL STYLES */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background-color: #1e1e1e; /* Dark background */
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* --- LANDING PAGE STYLES --- */
+        #landing-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Glitch Effect Title */
+        h1.title {
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-shadow: 2px 0px 0px rgba(255,0,0,0.8), -2px 0px 0px rgba(0,255,255,0.8);
+            margin-bottom: 30px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        /* Layout Selection Cards */
+        .layout-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .layout-card {
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 30px 20px;
+            width: 160px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layout-card:hover {
+            background-color: #333;
+        }
+
+        .layout-card .icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .layout-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Active/Selected State */
+        .layout-card.active {
+            border: 2px solid #f3b700;
+            background-color: #2b2300;
+            color: white;
+        }
+
+        /* Status / Error Text */
+        #statusText {
+            color: #f3b700; /* Yellow-orange color from your screenshot */
+            font-weight: bold;
+            margin-bottom: 20px;
+            height: 20px; /* fixed height para hindi gumalaw layout pag walang text */
+        }
+
+        /* Main Start Button */
+        .start-btn {
+            background-color: white;
+            color: black;
+            font-size: 1.2rem;
+            font-weight: 900;
+            padding: 12px 40px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+
+        .start-btn:hover { background-color: #f0f0f0; }
+        .start-btn:active { transform: scale(0.95); }
+
+
+        /* --- BOOTH PAGE STYLES --- */
+        #booth-container {
+            display: none; /* Nakatago muna */
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        video, canvas { 
+            border: 3px solid #444; 
+            border-radius: 10px; 
+            max-width: 100%; 
+            background-color: #000;
+        }
+
+        .capture-btn {
+            padding: 12px 30px; 
+            font-size: 16px; 
+            font-weight: bold;
+            cursor: pointer; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+        }
+
+        .capture-btn:hover { background-color: #218838; }
+        .capture-btn:disabled { background-color: #555; cursor: not-allowed; color: #888; }
+        
+        #qrcode { 
+            margin-top: 15px; 
+            padding: 15px; 
+            background: white; 
+            display: inline-block; 
+            border-radius: 10px; 
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>📸 Firebase Photo Booth</h1>
+    <div id="landing-page">
+        <h1 class="title">PRIME DUO PHOTOBOOTH</h1>
+        <p class="subtitle">Pumili ng Layout:</p>
+        
+        <div class="layout-container">
+            <div class="layout-card active" id="btn-single">
+                <span class="icon">🖼️</span>
+                <p>Single Full Photo</p>
+            </div>
+            <div class="layout-card" id="btn-strip">
+                <span class="icon">📜</span>
+                <p>3-Photo Strip<br>(Collage)</p>
+            </div>
+        </div>
 
-    <div class="booth-container">
-        <video id="camera" width="400" height="300" autoplay></video>
-        <button id="captureBtn">Take Photo & Get QR</button>
-        <canvas id="snapshot" width="400" height="300" style="display: none;"></canvas>
+        <p id="statusText"></p>
+
+        <button id="startShootBtn" class="start-btn">📸 START SHOOT</button>
+    </div>
+
+    <div id="booth-container">
+        <h1 class="title" style="font-size: 1.5rem; margin-top: 20px;">SMILE!</h1>
+        <video id="camera" width="600" height="450" autoplay></video>
+        <button id="captureBtn" class="capture-btn">📸 Take Photo & Get QR</button>
+        <canvas id="snapshot" width="600" height="450" style="display: none;"></canvas>
         <div id="qrcode"></div>
-        <p id="statusText">Bukas ang camera...</p>
+        <p id="boothStatusText" style="color: #f3b700;"></p>
+        <button id="backBtn" style="background: transparent; border: 1px solid #fff; color: white; padding: 8px 15px; border-radius: 5px; margin-top: 20px; cursor: pointer;">⬅ Bumalik</button>
     </div>
 
     <script type="module">
@@ -49,23 +206,69 @@
         const storage = getStorage(app);
 
         // UI Elements
+        const landingPage = document.getElementById('landing-page');
+        const boothContainer = document.getElementById('booth-container');
+        const statusText = document.getElementById('statusText');
+        const boothStatusText = document.getElementById('boothStatusText');
+        
         const video = document.getElementById('camera');
         const canvas = document.getElementById('snapshot');
         const ctx = canvas.getContext('2d');
         const captureBtn = document.getElementById('captureBtn');
         const qrcodeDiv = document.getElementById('qrcode');
-        const statusText = document.getElementById('statusText');
+        
+        // Layout Selection Logic
+        let selectedLayout = 'single'; // Default
+        const btnSingle = document.getElementById('btn-single');
+        const btnStrip = document.getElementById('btn-strip');
 
-        // 3. I-CONNECT ANG CAMERA
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then((stream) => { video.srcObject = stream; })
-            .catch((err) => { statusText.innerText = "Error sa camera: " + err; });
+        btnSingle.addEventListener('click', () => {
+            btnSingle.classList.add('active');
+            btnStrip.classList.remove('active');
+            selectedLayout = 'single';
+        });
+
+        btnStrip.addEventListener('click', () => {
+            btnStrip.classList.add('active');
+            btnSingle.classList.remove('active');
+            selectedLayout = 'strip';
+        });
+
+        // Start Shoot Logic (Switch Screen & Open Camera)
+        let streamActive = null;
+
+        document.getElementById('startShootBtn').addEventListener('click', () => {
+            landingPage.style.display = 'none';
+            boothContainer.style.display = 'flex';
+            boothStatusText.innerText = "Bukas ang camera...";
+            
+            // 3. I-CONNECT ANG CAMERA
+            navigator.mediaDevices.getUserMedia({ video: { width: 600, height: 450 } })
+                .then((stream) => { 
+                    streamActive = stream;
+                    video.srcObject = stream; 
+                })
+                .catch((err) => { 
+                    boothStatusText.innerText = "Error sa camera: " + err; 
+                });
+        });
+
+        // Back Button Logic
+        document.getElementById('backBtn').addEventListener('click', () => {
+            boothContainer.style.display = 'none';
+            landingPage.style.display = 'flex';
+            // Stop camera if going back
+            if (streamActive) {
+                streamActive.getTracks().forEach(track => track.stop());
+            }
+            qrcodeDiv.innerHTML = "";
+            canvas.style.display = "none";
+        });
 
         // 4. CAPTURE AT UPLOAD LOGIC
         captureBtn.addEventListener('click', async () => {
-            // Disable button habang nag-uupload para iwas double click
             captureBtn.disabled = true;
-            statusText.innerText = "Kinukuha ang picture...";
+            boothStatusText.innerText = "Kinukuha ang picture...";
 
             // Draw video frame to canvas
             canvas.style.display = "block";
@@ -74,33 +277,36 @@
             // Convert canvas to Data URL (Base64)
             const imageDataUrl = canvas.toDataURL('image/png');
 
-            // Setup Firebase Storage Reference (Gagawa ng folder na 'photos')
-            const fileName = `photos/photo_${Date.now()}.png`;
+            // Setup Firebase Storage Reference
+            const fileName = `photos/photo_${selectedLayout}_${Date.now()}.png`; // Dinagdag ang layout type sa filename
             const storageRef = ref(storage, fileName);
 
-            statusText.innerText = "Ina-upload sa Firebase Storage...";
+            boothStatusText.innerText = "Ina-upload sa Firebase Storage...";
 
             try {
                 // Upload sa Firebase
                 await uploadString(storageRef, imageDataUrl, 'data_url');
                 
-                // Kunin ang totoong link ng na-upload na picture
+                // Kunin ang totoong link
                 const downloadURL = await getDownloadURL(storageRef);
                 
-                // 5. I-GENERATE ANG QR CODE GAMIT ANG TOTOONG LINK
+                // 5. I-GENERATE ANG QR CODE
                 qrcodeDiv.innerHTML = "";
                 new QRCode(qrcodeDiv, {
                     text: downloadURL,
                     width: 150,
-                    height: 150
+                    height: 150,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
                 });
 
-                statusText.innerText = "Success! I-scan ang QR code para ma-download.";
+                boothStatusText.innerText = "Success! I-scan ang QR code para ma-download.";
             } catch (error) {
                 console.error("Upload error:", error);
-                statusText.innerText = "Error sa pag-upload. Naka-set up ba ang Storage Rules mo?";
+                boothStatusText.innerText = "Error sa pag-upload. Naka-set up ba ang Storage Rules mo?";
             } finally {
-                captureBtn.disabled = false; // I-enable ulit ang button
+                captureBtn.disabled = false;
             }
         });
     </script>
