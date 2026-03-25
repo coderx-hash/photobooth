@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prime Duo Photobooth PRO</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat&family=Comic+Neue:wght@700&family=Dancing+Script:wght@700&family=Lobster&family=Montserrat:wght@700;900&family=Oswald:wght@500;700&family=Pacifico&family=Playfair+Display:ital,wght@1,700&family=Poppins:wght@400;600;800;900&family=Raleway:wght@800&display=swap" rel="stylesheet">
     
     <style>
         /* --- GLOBAL VARIABLES --- */
@@ -25,20 +25,14 @@
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
         
         html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background-color: #050505; 
-            overflow-x: hidden;
+            width: 100%; height: 100%; margin: 0; padding: 0;
+            background-color: #050505; overflow-x: hidden;
         }
 
         body { 
             background: radial-gradient(circle at center, #1a1a2e 0%, #050505 100%);
-            background-attachment: fixed;
-            color: var(--text-main);
-            min-height: 100dvh; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-attachment: fixed; color: var(--text-main);
+            min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
         /* --- TYPOGRAPHY --- */
@@ -52,7 +46,7 @@
         }
         .subtitle { font-size: clamp(0.9rem, 2.5vw, 1.1rem); color: var(--text-muted); margin-top: 5px; font-weight: 400; letter-spacing: 1px; }
 
-        /* --- SCREENS (Responsive Containers) --- */
+        /* --- SCREENS --- */
         .screen {
             display: none; flex-direction: column; align-items: center; justify-content: center;
             width: 100%; max-width: 1200px; min-height: 100dvh;
@@ -61,30 +55,20 @@
         .screen.active { display: flex; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 
-        /* --- INTRO SCREEN SPECIFICS --- */
-        .intro-wrapper {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center;
-        }
-        .intro-title {
-            font-size: clamp(3.5rem, 10vw, 7rem); margin-bottom: 0; letter-spacing: 4px;
-        }
-        .intro-subtitle {
-            font-size: clamp(1.2rem, 3vw, 2rem); color: var(--primary); font-weight: 600; letter-spacing: 6px; margin-bottom: 50px; text-transform: uppercase;
-        }
-        .start-btn {
-            padding: 22px 60px; font-size: 1.2rem; font-weight: 800; border-radius: 50px;
-            animation: pulse 2s infinite; width: auto; min-width: 250px;
-        }
+        /* --- INTRO SCREEN --- */
+        .intro-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .intro-title { font-size: clamp(3.5rem, 10vw, 7rem); margin-bottom: 0; letter-spacing: 4px; }
+        .intro-subtitle { font-size: clamp(1.2rem, 3vw, 2rem); color: var(--primary); font-weight: 600; letter-spacing: 6px; margin-bottom: 50px; text-transform: uppercase; }
+        .start-btn { padding: 22px 60px; font-size: 1.2rem; font-weight: 800; border-radius: 50px; animation: pulse 2s infinite; width: auto; min-width: 250px; }
+        
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0.7); }
             70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(245, 176, 0, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0); }
         }
 
-        /* --- SETUP SECTIONS & CARDS --- */
+        /* --- SETUP SECTIONS --- */
         .setup-container { 
             width: 100%; max-width: 650px; background: var(--glass-bg); 
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); 
@@ -93,23 +77,11 @@
         }
         
         .section-label { font-size: 0.95rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 15px 5px; text-align: left; width: 100%; }
+        .smart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; width: 100%; margin-bottom: 35px; }
 
-        .smart-grid {
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); 
-            gap: 15px; width: 100%; margin-bottom: 35px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.02); border: 2px solid rgba(255, 255, 255, 0.05); border-radius: 20px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px 10px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; min-height: 120px;
-        }
-
+        .card { background: rgba(255, 255, 255, 0.02); border: 2px solid rgba(255, 255, 255, 0.05); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 10px; cursor: pointer; transition: all 0.3s; position: relative; min-height: 120px; }
         .card:hover { background: rgba(255, 255, 255, 0.06); transform: translateY(-4px); box-shadow: 0 15px 25px rgba(0,0,0,0.4); }
         .card.active { border-color: var(--primary); background: rgba(245, 176, 0, 0.08); box-shadow: 0 0 25px rgba(245, 176, 0, 0.15); }
-        
         .card .icon { font-size: 36px; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));}
         .card p { margin: 0; font-size: 0.95rem; font-weight: 600; text-align: center; color: var(--text-main); line-height: 1.3; }
         .card img.thumb { width: 55px; height: 55px; object-fit: contain; margin-bottom: 12px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6)); }
@@ -118,90 +90,95 @@
         .upload-card:hover { border-color: var(--primary); background: rgba(245, 176, 0, 0.05); }
         input[type="file"] { display: none; }
 
-        /* --- MODERN BUTTONS --- */
-        .btn {
-            font-size: 1rem; font-weight: 700; padding: 18px 30px; border-radius: 50px; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; text-transform: uppercase; letter-spacing: 1.5px; 
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            position: relative; overflow: hidden; border: none;
-        }
+        /* --- BUTTONS --- */
+        .btn { font-size: 1rem; font-weight: 700; padding: 18px 30px; border-radius: 50px; cursor: pointer; transition: all 0.3s; width: 100%; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; justify-content: center; gap: 10px; border: none; }
         .btn:active { transform: scale(0.95); }
-        
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--primary), #ff9800); 
-            color: #000; 
-            box-shadow: 0 8px 25px -5px rgba(245, 176, 0, 0.5); 
-        }
-        .btn-primary:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 15px 35px -5px rgba(245, 176, 0, 0.7); 
-            filter: brightness(1.1);
-        }
-        
-        .btn-secondary { 
-            background: rgba(255,255,255,0.05); color: var(--text-main); 
-            border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); 
-        }
-        .btn-secondary:hover { 
-            background: rgba(255,255,255,0.1); 
-            transform: translateY(-3px); 
-            border-color: rgba(255,255,255,0.3);
-        }
-
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #ff9800); color: #000; box-shadow: 0 8px 25px -5px rgba(245, 176, 0, 0.5); }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 35px -5px rgba(245, 176, 0, 0.7); filter: brightness(1.1); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-3px); border-color: rgba(255,255,255,0.3); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
         .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5); transform: translateY(-3px); border-color: var(--danger);}
 
-        /* --- CAMERA & PREVIEW AREA --- */
+        /* --- CAMERA AREA --- */
         .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; }
-        
-        .video-wrapper {
-            position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden;
-            border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: 65vh; 
-        }
-
-        /* Responsive Orientation Handling */
+        .video-wrapper { position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s; max-height: 60vh; }
         .video-wrapper.landscape { aspect-ratio: 4/3; }
         .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 450px; margin: 0 auto; } 
 
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
-        
         .frame-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 10; }
 
-        /* Countdown & Flash */
-        .countdown-overlay {
-            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-            font-size: clamp(6rem, 20vw, 15rem); font-weight: 900; color: white;
-            text-shadow: 0px 10px 40px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3);
-            opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20;
+        /* Draggable Text */
+        #text-overlay-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: hidden; }
+        .draggable-text {
+            position: absolute; pointer-events: auto; cursor: grab; user-select: none;
+            white-space: nowrap; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.6));
+            padding: 5px; border: 2px dashed transparent; line-height: 1.2;
+            transform: translate(-50%, -50%); /* Centered dragging origin */
         }
-        .flash { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 30; }
+        .draggable-text:active { cursor: grabbing; }
+        .draggable-text.active-element { border-color: var(--primary); background: rgba(255,255,255,0.1); border-radius: 8px;}
 
-        /* Control Buttons Container */
-        .controls-row { 
-            display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; 
-            width: 100%; max-width: 650px; margin-top: 30px; justify-content: center; 
+        /* --- TEXT & EMOJI TOOLS --- */
+        .tools-wrapper {
+            width: 100%; max-width: 850px; background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--glass-border); border-radius: 16px; 
+            padding: 15px; margin-top: 15px; display: flex; flex-direction: column; gap: 10px;
         }
+
+        /* Emoji Scroll Bar */
+        .emoji-row {
+            display: flex; align-items: center; gap: 10px; width: 100%;
+            background: rgba(0,0,0,0.3); border-radius: 12px; padding: 5px;
+        }
+        .emoji-btn-scroll { background: transparent; border: none; color: var(--primary); font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
+        .emoji-list {
+            display: flex; gap: 12px; overflow-x: auto; scroll-behavior: smooth; 
+            padding: 5px 0; flex: 1; -ms-overflow-style: none; scrollbar-width: none;
+        }
+        .emoji-list::-webkit-scrollbar { display: none; }
+        .emoji-item { font-size: 1.8rem; cursor: pointer; transition: transform 0.2s; user-select: none; }
+        .emoji-item:hover { transform: scale(1.3); }
+
+        /* Main Tools */
+        .text-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+        
+        .input-group { display: flex; flex: 1; min-width: 200px; gap: 10px; align-items: center; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 5px 15px; }
+        #customText { 
+            border: none; background: transparent; color: white; flex: 1; 
+            font-size: 1.2rem; outline: none; padding: 8px 0;
+            transition: font-size 0.2s, font-family 0.2s, color 0.2s;
+        }
+        
+        .tool-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: center;}
+        
+        select { padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.8); color: white; cursor: pointer; font-size: 1rem; outline: none;}
+        select option { background: #000; color: #fff; }
+        
+        input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 8px; cursor: pointer; background: transparent; padding: 0; }
+        
+        /* Size Slider */
+        .size-slider-container { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 5px 12px; border-radius: 10px; }
+        .size-slider-container span { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); }
+        input[type="range"] { accent-color: var(--primary); cursor: pointer; width: 100px; }
+
+        .btn-small { padding: 12px 20px; font-size: 0.9rem; width: auto; border-radius: 10px; }
+
+        /* Controls */
+        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 15px; justify-content: center; }
         .controls-row .btn { flex: 1 1 200px; }
 
-        /* --- PASSWORD MODAL --- */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 20px;
-        }
-        .modal-box {
-            background: var(--bg-dark); padding: 40px 30px; border-radius: 28px;
-            border: 1px solid var(--glass-border); width: 100%; max-width: 400px; text-align: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-        }
-        .modal-box h2 { margin-bottom: 5px; color: var(--text-main); font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;}
-        .modal-box input {
-            width: 100%; padding: 18px; margin: 25px 0; border-radius: 16px; border: 2px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03); color: white; font-family: 'Poppins', sans-serif;
-            font-size: 1.2rem; text-align: center; outline: none; transition: all 0.3s;
-        }
-        .modal-box input:focus { border-color: var(--primary); background: rgba(245, 176, 0, 0.05); box-shadow: 0 0 20px rgba(245, 176, 0, 0.1); }
+        .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: clamp(6rem, 20vw, 15rem); font-weight: 900; color: white; text-shadow: 0px 10px 40px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20; }
+        .flash { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; z-index: 30; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(15px); padding: 20px; }
+        .modal-box { background: var(--bg-dark); padding: 40px 30px; border-radius: 28px; border: 1px solid var(--glass-border); width: 100%; max-width: 400px; text-align: center; }
+        .modal-box h2 { margin-bottom: 5px; color: var(--text-main); font-size: 1.6rem; font-weight: 800; }
+        .modal-box input { width: 100%; padding: 18px; margin: 25px 0; border-radius: 16px; border: 2px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: white; font-size: 1.2rem; text-align: center; outline: none; }
+        .modal-box input:focus { border-color: var(--primary); background: rgba(245, 176, 0, 0.05); }
     </style>
 </head>
 <body>
@@ -223,22 +200,15 @@
         <div class="setup-container">
             <div class="section-label">1. Choose Orientation</div>
             <div class="smart-grid">
-                <div class="card active" onclick="selectOrientation('landscape')" id="ori-landscape">
-                    <span class="icon">🖥️</span><p>Landscape<br><small style="font-weight:400; opacity:0.6;">(Pahiga)</small></p>
-                </div>
-                <div class="card" onclick="selectOrientation('portrait')" id="ori-portrait">
-                    <span class="icon">📱</span><p>Portrait<br><small style="font-weight:400; opacity:0.6;">(Patayo)</small></p>
-                </div>
+                <div class="card active" onclick="selectOrientation('landscape')" id="ori-landscape"><span class="icon">🖥️</span><p>Landscape</p></div>
+                <div class="card" onclick="selectOrientation('portrait')" id="ori-portrait"><span class="icon">📱</span><p>Portrait</p></div>
             </div>
 
             <div class="section-label">2. Select Overlay Frame</div>
             <div class="smart-grid" id="frame-selection">
-                <div class="card active frame-option" onclick="selectFrame('none', this)" id="frame-none">
-                    <span class="icon">🚫</span><p>No Frame</p>
-                </div>
-                
+                <div class="card active frame-option" onclick="selectFrame('none', this)" id="frame-none"><span class="icon">🚫</span><p>No Frame</p></div>
                 <label class="card upload-card frame-option" for="customFrameUpload">
-                    <span class="icon" style="color: var(--primary);">➕</span><p>Add PNG<br><small style="font-weight:400; opacity:0.6;">Transparent</small></p>
+                    <span class="icon" style="color: var(--primary);">➕</span><p>Add PNG</p>
                     <input type="file" id="customFrameUpload" accept="image/png">
                 </label>
             </div>
@@ -249,15 +219,59 @@
 
     <div id="booth-screen" class="screen">
         <div class="camera-container">
-            <div class="title-container">
-                <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">STRIKE A POSE</h1>
+            <div class="title-container" style="margin-bottom: 10px;">
+                <h1 class="title" style="font-size: clamp(1.5rem, 4vw, 2.5rem);">STRIKE A POSE</h1>
+                <p class="subtitle" style="margin-top:0;">Add text/emojis before snapping!</p>
             </div>
             
             <div class="video-wrapper landscape" id="vid-wrapper">
                 <video id="camera" playsinline autoplay></video>
                 <img id="live-overlay" class="frame-overlay" src="" style="display:none;">
+                <div id="text-overlay-container"></div>
                 <div id="countdown" class="countdown-overlay">3</div>
                 <div id="flash" class="flash"></div>
+            </div>
+
+            <div class="tools-wrapper" id="tools-wrapper">
+                
+                <div class="emoji-row">
+                    <button class="emoji-btn-scroll" onclick="document.getElementById('emoji-list').scrollLeft -= 100">◀</button>
+                    <div class="emoji-list" id="emoji-list">
+                        </div>
+                    <button class="emoji-btn-scroll" onclick="document.getElementById('emoji-list').scrollLeft += 100">▶</button>
+                </div>
+
+                <div class="text-tools">
+                    <div class="input-group">
+                        <input type="color" id="textColor" value="#ffffff" oninput="updateLiveStyles()">
+                        <input type="text" id="customText" placeholder="Type here..." oninput="updateLiveStyles()">
+                    </div>
+                    
+                    <div class="tool-controls">
+                        <select id="textFont" onchange="updateLiveStyles()">
+                            <option value="'Poppins', sans-serif" style="font-family: 'Poppins', sans-serif;">Poppins</option>
+                            <option value="'Bebas Neue', cursive" style="font-family: 'Bebas Neue', cursive;">Bebas Neue</option>
+                            <option value="'Pacifico', cursive" style="font-family: 'Pacifico', cursive;">Pacifico</option>
+                            <option value="'Lobster', cursive" style="font-family: 'Lobster', cursive;">Lobster</option>
+                            <option value="'Dancing Script', cursive" style="font-family: 'Dancing Script', cursive;">Dancing Script</option>
+                            <option value="'Caveat', cursive" style="font-family: 'Caveat', cursive;">Caveat</option>
+                            <option value="'Comic Neue', cursive" style="font-family: 'Comic Neue', cursive;">Comic Neue</option>
+                            <option value="'Montserrat', sans-serif" style="font-family: 'Montserrat', sans-serif;">Montserrat</option>
+                            <option value="'Oswald', sans-serif" style="font-family: 'Oswald', sans-serif;">Oswald</option>
+                            <option value="'Playfair Display', serif" style="font-family: 'Playfair Display', serif;">Playfair</option>
+                        </select>
+                        
+                        <div class="size-slider-container">
+                            <span>Size</span>
+                            <input type="range" id="textSize" min="20" max="150" value="50" oninput="updateLiveStyles()">
+                        </div>
+
+                        <button class="btn btn-primary btn-small" onclick="addTextToCanvas()">➕ Add</button>
+                    </div>
+                </div>
+                <small style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">
+                    *Double-tap added text to delete. Click added text to edit its size/color.
+                </small>
             </div>
 
             <div class="controls-row" id="booth-controls">
@@ -274,11 +288,9 @@
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">LOOKS GREAT!</h1>
                 <p class="subtitle">Keep this photo or try again?</p>
             </div>
-            
             <div class="video-wrapper landscape" id="preview-wrapper">
                 <img id="preview-img" src="">
             </div>
-
             <div class="controls-row">
                 <button class="btn btn-danger" onclick="retakePhoto()">🗑️ Retake</button>
                 <button class="btn btn-primary" onclick="savePhoto()">💾 Save & Upload</button>
@@ -291,7 +303,6 @@
             <h1 class="title" id="resultTitle" style="font-size: clamp(2.5rem, 6vw, 4.5rem);">UPLOADING</h1>
             <p id="uploadStatus" class="subtitle" style="font-size: clamp(1rem, 3vw, 1.3rem);">Saving securely to the cloud...</p>
         </div>
-
         <div id="success-buttons" class="controls-row" style="display:none; justify-content: center;">
             <button class="btn btn-primary" onclick="showPasswordModal()" style="max-width: 350px;">✨ New Session</button>
         </div>
@@ -302,12 +313,10 @@
             <h2>Admin Access</h2>
             <p style="font-size: 0.95rem; color: var(--text-muted);">Enter password to unlock.</p>
             <input type="password" id="sessionPassword" placeholder="Password...">
-            
             <div style="display: flex; gap: 12px; flex-direction: column;">
                 <button class="btn btn-primary" onclick="verifyPassword()">Unlock</button>
                 <button class="btn btn-secondary" onclick="closePasswordModal()" style="border: none;">Cancel</button>
             </div>
-            
             <p id="passError" style="color: var(--danger); display: none; margin-top: 15px; font-weight: 600; font-size: 0.9rem;">Incorrect password!</p>
         </div>
     </div>
@@ -316,7 +325,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
-        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDrTbjnBeyNTQZU3hkaGfnXESvOKaQBIKk",
             authDomain: "photobooth-d94d3.firebaseapp.com",
@@ -325,16 +333,15 @@
             messagingSenderId: "557746814376",
             appId: "1:557746814376:web:fb4e9379767db0c39ab19d"
         };
-
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
-        // STATE VARIABLES
         window.config = { orientation: 'landscape', frameSrc: null };
         let streamActive = null;
         let currentPhotoDataUrl = null;
+        let activeDraggable = null; // Tracks which text is currently selected
 
-        // ELEMENTS
+        // Elements
         const video = document.getElementById('camera');
         const vidWrapper = document.getElementById('vid-wrapper');
         const previewWrapper = document.getElementById('preview-wrapper');
@@ -345,28 +352,41 @@
         const countdownEl = document.getElementById('countdown');
         const flashEl = document.getElementById('flash');
         const boothControls = document.getElementById('booth-controls');
+        const textContainer = document.getElementById('text-overlay-container');
+        const customTextInput = document.getElementById('customText');
 
-        // --- NAVIGATION LOGIC ---
+        // --- POPULATE EMOJIS ---
+        const emojis = ["😂","😍","🔥","✨","🎉","😎","❤️","💯","👑","🎂","🥳","💍","🍻","📸","✌️","🫶","🤪","🦋","⭐","🎈","🍾","👽","👻","🍕","🍟","🍩"];
+        const emojiListEl = document.getElementById('emoji-list');
+        emojis.forEach(emo => {
+            const span = document.createElement('span');
+            span.className = 'emoji-item';
+            span.innerText = emo;
+            span.onclick = () => {
+                customTextInput.value += emo; // Add emoji to input box
+                updateLiveStyles();
+            };
+            emojiListEl.appendChild(span);
+        });
+
+        // --- NAVIGATION ---
         window.switchScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // --- UI SELECTIONS ---
         window.selectOrientation = (type) => {
             config.orientation = type;
             document.getElementById('ori-landscape').classList.remove('active');
             document.getElementById('ori-portrait').classList.remove('active');
             document.getElementById(`ori-${type}`).classList.add('active');
-            
             vidWrapper.className = `video-wrapper ${type}`;
             previewWrapper.className = `video-wrapper ${type}`;
         };
 
         window.selectFrame = (srcUrl, cardElement) => {
             document.querySelectorAll('.frame-option').forEach(c => c.classList.remove('active'));
-            
             if (srcUrl === 'none') {
                 config.frameSrc = null;
                 overlayImg.style.display = 'none';
@@ -378,7 +398,6 @@
             if(cardElement) cardElement.classList.add('active');
         };
 
-        // --- DYNAMIC FRAME UPLOAD ---
         let customFrameCount = 1;
         document.getElementById('customFrameUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -386,18 +405,12 @@
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const src = event.target.result;
-                    
                     const newCard = document.createElement('div');
                     newCard.className = 'card frame-option';
-                    newCard.innerHTML = `
-                        <img src="${src}" class="thumb">
-                        <p>Frame ${customFrameCount++}</p>
-                    `;
+                    newCard.innerHTML = `<img src="${src}" class="thumb"><p>Frame ${customFrameCount++}</p>`;
                     newCard.onclick = function() { selectFrame(src, newCard); };
-                    
                     const uploadLabel = document.querySelector('.upload-card');
                     document.getElementById('frame-selection').insertBefore(newCard, uploadLabel);
-                    
                     selectFrame(src, newCard);
                 };
                 reader.readAsDataURL(file);
@@ -405,10 +418,149 @@
             }
         });
 
-        // --- CAMERA LOGIC ---
+        // --- LIVE PREVIEW & RESIZING LOGIC ---
+        window.updateLiveStyles = () => {
+            const size = document.getElementById('textSize').value + 'px';
+            const font = document.getElementById('textFont').value;
+            const color = document.getElementById('textColor').value;
+
+            // 1. Update the input field live preview
+            customTextInput.style.fontFamily = font;
+            customTextInput.style.color = color;
+
+            // 2. If an element is selected on the screen, update it live too
+            if (activeDraggable) {
+                activeDraggable.style.fontSize = size;
+                activeDraggable.style.fontFamily = font;
+                activeDraggable.style.color = color;
+                
+                // Keep input text in sync if they are typing while selected
+                if(document.activeElement === customTextInput) {
+                    activeDraggable.innerText = customTextInput.value;
+                }
+            }
+        };
+
+        // Deselect text when clicking the video background
+        vidWrapper.addEventListener('click', (e) => {
+            if(e.target === video || e.target === overlayImg || e.target === textContainer) {
+                clearSelection();
+            }
+        });
+
+        function clearSelection() {
+            if(activeDraggable) activeDraggable.classList.remove('active-element');
+            activeDraggable = null;
+            customTextInput.value = ''; // Reset input for new text
+            document.getElementById('textSize').value = 50; // Reset slider
+        }
+
+        window.addTextToCanvas = () => {
+            const textInput = customTextInput.value;
+            if (!textInput.trim()) return;
+
+            const color = document.getElementById('textColor').value;
+            const font = document.getElementById('textFont').value;
+            const size = document.getElementById('textSize').value + 'px';
+
+            const textEl = document.createElement('div');
+            textEl.className = 'draggable-text';
+            textEl.innerText = textInput;
+            textEl.style.color = color;
+            textEl.style.fontFamily = font;
+            textEl.style.fontSize = size;
+            
+            // Spawn in center
+            textEl.style.top = '50%';
+            textEl.style.left = '50%';
+            
+            // Select it upon clicking
+            textEl.addEventListener('mousedown', () => selectElement(textEl));
+            textEl.addEventListener('touchstart', () => selectElement(textEl), {passive: true});
+
+            // Delete on double tap
+            textEl.addEventListener('dblclick', () => { 
+                if(activeDraggable === textEl) clearSelection();
+                textEl.remove(); 
+            });
+            
+            makeDraggable(textEl);
+            textContainer.appendChild(textEl);
+            
+            selectElement(textEl); // Auto select new item
+        };
+
+        function selectElement(el) {
+            if(activeDraggable) activeDraggable.classList.remove('active-element');
+            activeDraggable = el;
+            el.classList.add('active-element');
+            
+            // Sync controls to the selected element
+            customTextInput.value = el.innerText;
+            document.getElementById('textSize').value = parseFloat(window.getComputedStyle(el).fontSize);
+            
+            // RGB to Hex for color picker sync
+            const rgb = window.getComputedStyle(el).color;
+            const hex = rgbToHex(rgb);
+            if(hex) document.getElementById('textColor').value = hex;
+            
+            // Try to sync font (optional, exact matching can be tricky)
+            const fontFamily = window.getComputedStyle(el).fontFamily;
+            Array.from(document.getElementById('textFont').options).forEach(opt => {
+                if(fontFamily.includes(opt.value.split(',')[0].replace(/'/g, ""))) {
+                    document.getElementById('textFont').value = opt.value;
+                }
+            });
+        }
+
+        function rgbToHex(rgb) {
+            const result = rgb.match(/\d+/g);
+            if(!result || result.length < 3) return null;
+            return "#" + ((1 << 24) + (parseInt(result[0]) << 16) + (parseInt(result[1]) << 8) + parseInt(result[2])).toString(16).slice(1);
+        }
+
+        // Dragging Logic
+        function makeDraggable(el) {
+            let isDragging = false, startX, startY, initialX, initialY;
+
+            const dragStart = (e) => {
+                isDragging = true;
+                if (e.type === "touchstart") { startX = e.touches[0].clientX; startY = e.touches[0].clientY; } 
+                else { startX = e.clientX; startY = e.clientY; }
+                initialX = el.offsetLeft; initialY = el.offsetTop;
+            };
+
+            const dragMove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault(); 
+                let currentX, currentY;
+                if (e.type === "touchmove") { currentX = e.touches[0].clientX; currentY = e.touches[0].clientY; } 
+                else { currentX = e.clientX; currentY = e.clientY; }
+
+                let newX = initialX + (currentX - startX);
+                let newY = initialY + (currentY - startY);
+
+                el.style.left = `${newX}px`;
+                el.style.top = `${newY}px`;
+            };
+
+            const dragEnd = () => { isDragging = false; };
+
+            el.addEventListener('mousedown', dragStart);
+            el.addEventListener('touchstart', dragStart, {passive: false});
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('touchmove', dragMove, {passive: false});
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchend', dragEnd);
+        }
+
+        // --- CAMERA ---
         window.openCamera = async () => {
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
+            document.getElementById('tools-wrapper').style.display = 'flex';
+            textContainer.innerHTML = ''; 
+            clearSelection();
 
             if (config.frameSrc) {
                 overlayImg.src = config.frameSrc;
@@ -429,9 +581,7 @@
             switchScreen('setup-screen');
         };
 
-        // --- CAPTURE & PREVIEW LOGIC ---
         const sleep = ms => new Promise(r => setTimeout(r, ms));
-
         const playCountdown = async () => {
             countdownEl.style.opacity = '1';
             for (let i = 3; i > 0; i--) { countdownEl.innerText = i; await sleep(1000); }
@@ -440,8 +590,11 @@
             setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
+        // --- SNAP & RENDER ---
         window.startCapture = async () => {
+            clearSelection(); // Remove borders before snapshot
             boothControls.style.display = 'none';
+            document.getElementById('tools-wrapper').style.display = 'none';
             await playCountdown();
             
             if (config.orientation === 'landscape') { tempCanvas.width = 1200; tempCanvas.height = 900; } 
@@ -459,9 +612,45 @@
                 await new Promise(r => { img.onload = r; });
                 tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
             }
+
+            const wrapperRect = vidWrapper.getBoundingClientRect();
+            const scaleX = tempCanvas.width / wrapperRect.width;
+            const scaleY = tempCanvas.height / wrapperRect.height;
+
+            document.querySelectorAll('.draggable-text').forEach(el => {
+                const elRect = el.getBoundingClientRect();
+                
+                // Account for the transform: translate(-50%, -50%) in CSS
+                const centerX = elRect.left + (elRect.width / 2);
+                const centerY = elRect.top + (elRect.height / 2);
+
+                const relativeX = centerX - wrapperRect.left;
+                const relativeY = centerY - wrapperRect.top;
+
+                const finalX = relativeX * scaleX;
+                const finalY = relativeY * scaleY;
+
+                const computedStyle = window.getComputedStyle(el);
+                const fontSize = parseFloat(computedStyle.fontSize);
+                const finalFontSize = fontSize * scaleY; 
+
+                tempCtx.font = `${finalFontSize}px ${computedStyle.fontFamily}`;
+                tempCtx.fillStyle = computedStyle.color;
+                
+                // Align center to match HTML translation
+                tempCtx.textAlign = 'center';
+                tempCtx.textBaseline = 'middle';
+                
+                tempCtx.shadowColor = 'rgba(0,0,0,0.6)';
+                tempCtx.shadowBlur = 4 * scaleY;
+                tempCtx.shadowOffsetX = 2 * scaleX;
+                tempCtx.shadowOffsetY = 2 * scaleY;
+
+                tempCtx.fillText(el.innerText, finalX, finalY);
+                tempCtx.shadowColor = 'transparent'; // Reset
+            });
             
             currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
-            
             previewImg.src = currentPhotoDataUrl;
             switchScreen('preview-screen');
         };
@@ -471,11 +660,11 @@
             previewImg.src = "";
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
+            document.getElementById('tools-wrapper').style.display = 'flex';
         };
 
         window.savePhoto = async () => {
             switchScreen('result-screen');
-            
             const titleEl = document.getElementById('resultTitle');
             const statusEl = document.getElementById('uploadStatus');
             
@@ -490,7 +679,6 @@
 
             try {
                 await uploadString(storageRef, currentPhotoDataUrl, 'data_url');
-                
                 titleEl.innerText = "SUCCESS!";
                 titleEl.style.background = "linear-gradient(135deg, #4ade80 0%, #16a34a 100%)";
                 titleEl.style.webkitBackgroundClip = "text";
@@ -506,22 +694,14 @@
             }
         };
 
-        // --- PASSWORD SECURITY ---
         const ACTUAL_PASSWORD = "PRIME2026";
-
-        window.showPasswordModal = () => {
-            document.getElementById('pass-modal').style.display = 'flex';
-            document.getElementById('sessionPassword').value = '';
-            document.getElementById('passError').style.display = 'none';
-        };
-
+        window.showPasswordModal = () => { document.getElementById('pass-modal').style.display = 'flex'; document.getElementById('sessionPassword').value = ''; document.getElementById('passError').style.display = 'none'; };
         window.closePasswordModal = () => { document.getElementById('pass-modal').style.display = 'none'; };
-
         window.verifyPassword = () => {
             if (document.getElementById('sessionPassword').value === ACTUAL_PASSWORD) {
                 closePasswordModal();
                 currentPhotoDataUrl = null;
-                endSession(); // This will bring you to Setup screen instead of Intro after successful session
+                endSession(); 
             } else { 
                 document.getElementById('passError').style.display = 'block'; 
             }
