@@ -3,124 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prime Duo Photobooth</title>
+    <title>Prime Duo Photobooth PRO</title>
     <style>
-        /* GLOBAL STYLES */
+        /* --- GLOBAL STYLES & GLASSMORPHISM --- */
         :root {
             --primary: #f3b700;
-            --dark: #121212;
-            --card-bg: #1e1e1e;
+            --primary-glow: rgba(243, 183, 0, 0.5);
+            --dark-bg: #0a0a0c;
+            --glass-bg: rgba(30, 30, 35, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
             --text: #ffffff;
         }
 
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Poppins', 'Segoe UI', Tahoma, sans-serif; 
             text-align: center; 
-            background-color: var(--dark);
+            background: linear-gradient(135deg, #0f0f13, #1a1a24);
             color: var(--text);
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            min-height: 100vh; overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         h1.title {
-            font-size: clamp(2rem, 5vw, 3rem);
-            letter-spacing: 2px; text-transform: uppercase;
-            text-shadow: 2px 0px 0px rgba(255,0,0,0.8), -2px 0px 0px rgba(0,255,255,0.8);
-            margin-bottom: 10px;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            letter-spacing: 3px;
+            font-weight: 900;
+            margin-bottom: 5px;
+            text-shadow: 0 0 20px var(--primary-glow);
+            background: -webkit-linear-gradient(#fff, #f3b700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .subtitle { font-size: 1.1rem; margin-bottom: 20px; color: #ccc; }
+        .subtitle { font-size: 1rem; color: #aaa; margin-bottom: 25px; }
 
+        /* --- SCREENS --- */
         .screen {
-            display: none; flex-direction: column; align-items: center;
-            width: 100%; max-width: 800px; padding: 20px; box-sizing: border-box;
-            animation: fadeIn 0.5s ease-in-out;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: fadeIn 0.4s ease-out forwards;
         }
-
         .screen.active { display: flex; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: scale(0.95); } 
+            to { opacity: 1; transform: scale(1); } 
+        }
 
-        /* SELECTION CARDS */
-        .section-title { font-weight: bold; margin: 20px 0 10px; border-bottom: 2px solid #333; padding-bottom: 5px; width: 100%; text-align: left; }
+        /* --- GLASS CARDS (SELECTION) --- */
+        .section-title { font-weight: 600; margin: 25px 0 15px; width: 100%; text-align: left; color: var(--primary); font-size: 1.2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;}
         
         .grid-container {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 15px; width: 100%; margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            width: 100%;
         }
 
         .card {
-            background-color: var(--card-bg); border: 2px solid #333; border-radius: 12px;
-            padding: 15px 10px; cursor: pointer; transition: all 0.3s;
-            display: flex; flex-direction: column; align-items: center;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .card:hover { transform: translateY(-3px); background-color: #2a2a2a; }
-        .card.active { border-color: var(--primary); background-color: rgba(243, 183, 0, 0.1); box-shadow: 0 0 15px rgba(243, 183, 0, 0.3); }
-        .card .icon { font-size: 28px; margin-bottom: 10px; }
-        .card p { margin: 0; font-size: 0.9rem; font-weight: bold; }
+        .card:hover { transform: translateY(-5px); background: rgba(50, 50, 60, 0.8); }
+        .card.active { 
+            border-color: var(--primary); 
+            background: rgba(243, 183, 0, 0.15); 
+            box-shadow: 0 0 20px var(--primary-glow); 
+        }
+        
+        .card img.preview-thumb { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+        .card .icon { font-size: 32px; margin-bottom: 10px; }
+        .card p { margin: 0; font-size: 0.95rem; font-weight: 500; }
 
-        /* BUTTONS */
+        /* --- UPLOAD BUTTON IN GRID --- */
+        .upload-card { border: 1px dashed var(--primary); background: transparent; }
+        .upload-card:hover { background: rgba(243, 183, 0, 0.1); }
+        input[type="file"] { display: none; }
+
+        /* --- BUTTONS --- */
         .btn {
-            background-color: var(--text); color: var(--dark);
-            font-size: 1.1rem; font-weight: 900; padding: 15px 40px;
+            background: var(--text); color: var(--dark-bg);
+            font-size: 1.2rem; font-weight: 800; padding: 15px 40px;
             border-radius: 50px; border: none; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.2s;
-            margin-top: 10px; width: 100%; max-width: 300px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: all 0.2s; margin-top: 20px; width: 100%; max-width: 350px;
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn:hover { background-color: #e0e0e0; transform: scale(1.02); }
-        .btn:active { transform: scale(0.95); }
-        .btn-primary { background-color: var(--primary); }
-        .btn-primary:hover { background-color: #d4a000; }
-        .btn-danger { background-color: #ff4757; color: white; }
-        .btn-danger:hover { background-color: #ff6b81; }
-        .btn-outline { background: transparent; border: 2px solid #555; color: white; }
-        .btn-outline:hover { border-color: var(--primary); }
+        .btn:hover { transform: scale(1.03); box-shadow: 0 10px 25px rgba(255,255,255,0.2); }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--primary); color: #000; box-shadow: 0 8px 20px var(--primary-glow); }
+        .btn-primary:hover { background: #ffd000; box-shadow: 0 10px 25px rgba(243, 183, 0, 0.6); }
+        .btn-danger { background: #ff4757; color: white; box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4); }
+        .btn-outline { background: transparent; border: 2px solid #555; color: white; box-shadow: none; }
+        .btn-outline:hover { border-color: var(--primary); background: rgba(243, 183, 0, 0.1); }
 
-        /* CAMERA BOOTH & LIVE FRAME OVERLAY */
+        /* --- CAMERA & LIVE OVERLAY --- */
         .video-wrapper {
-            position: relative; width: 100%; max-width: 600px;
-            border-radius: 10px; overflow: hidden; border: 4px solid #333;
-            background: #000; aspect-ratio: 4/3;
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--glass-border);
+            background: #000;
+            aspect-ratio: 4/3;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
         }
 
         video { width: 100%; height: 100%; object-fit: cover; }
-
+        
+        /* ITO YUNG LIVE FRAME OVERLAY */
         .frame-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* Para hindi ma-block ang clicks sa video */
-            z-index: 5; object-fit: fill; 
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; /* Para sumakto yung design sa screen */
+            pointer-events: none; /* Para hindi ma-block yung clicks sa video kung meron man */
+            z-index: 10;
         }
 
         .countdown-overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 8rem; font-weight: bold; color: white;
-            text-shadow: 0px 0px 20px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3);
-            opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10;
+            font-size: 10rem; font-weight: 900; color: white;
+            text-shadow: 0px 0px 30px rgba(0,0,0,1); background: rgba(0,0,0,0.2);
+            opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20;
         }
 
-        .flash { position: absolute; top:0; left:0; width:100%; height:100%; background: white; opacity: 0; pointer-events: none; z-index: 15; }
+        .flash {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: white; opacity: 0; pointer-events: none; z-index: 30;
+        }
 
-        /* RESULTS & MODALS */
-        #finalResultImg { max-width: 100%; border: 4px solid #fff; border-radius: 10px; margin: 20px 0; max-height: 50vh; object-fit: contain; }
-        #statusText { color: var(--primary); font-weight: bold; min-height: 24px; margin: 15px 0; }
-        
+        /* --- MODAL --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8); display: none;
+            background: rgba(0,0,0,0.9); display: none;
             align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(5px);
         }
         .modal-box {
-            background: var(--card-bg); padding: 30px; border-radius: 15px;
-            border: 1px solid #444; width: 90%; max-width: 350px;
+            background: var(--dark-bg); padding: 40px; border-radius: 20px;
+            border: 1px solid var(--primary); width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 0 30px rgba(243, 183, 0, 0.2);
         }
         .modal-box input {
-            width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px;
-            border: 1px solid #555; background: #111; color: white; font-size: 1rem; box-sizing: border-box;
+            width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px;
+            border: 1px solid #444; background: #1a1a24; color: white;
+            font-size: 1.2rem; text-align: center; box-sizing: border-box; outline: none;
         }
+        .modal-box input:focus { border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -129,7 +182,7 @@
         <h1 class="title">PRIME DUO</h1>
         <p class="subtitle">Customize Your Session</p>
         
-        <div class="section-title">1. Pumili ng Layout</div>
+        <div class="section-title">1. Choose Layout</div>
         <div class="grid-container">
             <div class="card active" onclick="selectLayout('single')" id="layout-single">
                 <span class="icon">🖼️</span><p>1 Shot (Full)</p>
@@ -139,38 +192,48 @@
             </div>
         </div>
 
-        <div class="section-title">2. Pumili ng Frame Design</div>
-        <div class="grid-container">
-            <div class="card active" onclick="selectFrame('wedding')" id="frame-wedding">
-                <span class="icon">💍</span><p>Kasalan (Wedding)</p>
+        <div class="section-title">2. Choose Overlay Frame</div>
+        <div class="grid-container" id="frame-selection">
+            <div class="card active" onclick="selectFrame('none')" id="frame-none">
+                <span class="icon">🚫</span><p>No Frame</p>
             </div>
-            <div class="card" onclick="selectFrame('floral')" id="frame-floral">
-                <span class="icon">🌸</span><p>Flowers (Floral)</p>
+            
+            <div class="card" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png')" id="frame-wedding">
+                <span class="icon">💍</span><p>Kasalan Frame</p>
             </div>
-            <div class="card" onclick="selectFrame('cartoon')" id="frame-cartoon">
-                <span class="icon">💥</span><p>Cartoon Style</p>
+
+            <div class="card" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png')" id="frame-cartoon">
+                <span class="icon">🦄</span><p>Cartoons</p>
             </div>
+
+            <div class="card" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png')" id="frame-flowers">
+                <span class="icon">🌸</span><p>Flower Border</p>
+            </div>
+
+            <label class="card upload-card" for="customFrameUpload">
+                <span class="icon">⬆️</span><p>Upload Design</p>
+                <input type="file" id="customFrameUpload" accept="image/png">
+            </label>
         </div>
 
-        <button class="btn btn-primary" onclick="openCamera()">📸 OPEN CAMERA</button>
+        <button class="btn btn-primary" onclick="openCamera()">📸 START CAMERA</button>
     </div>
 
     <div id="booth-screen" class="screen">
-        <h1 class="title" style="font-size: 1.8rem;">GET READY!</h1>
-        <p id="boothStatusText" style="color: var(--primary);">Naka-ready na ang camera...</p>
+        <h1 class="title" style="font-size: 2rem;">STRIKE A POSE!</h1>
+        <p id="boothStatusText" style="color: var(--primary);">Ready...</p>
         
         <div class="video-wrapper">
             <video id="camera" playsinline autoplay></video>
-            <img id="live-frame" class="frame-overlay" src="" alt="">
-            
+            <img id="live-overlay" class="frame-overlay" src="" style="display:none;">
             <div id="countdown" class="countdown-overlay">3</div>
             <div id="flash" class="flash"></div>
         </div>
 
         <p id="shot-counter" style="font-size: 1.2rem; font-weight: bold; margin: 15px 0; display: none;">Shot 1 of 3</p>
 
-        <div style="display: flex; gap: 10px; width: 100%; max-width: 400px; margin-top: 15px;">
-            <button id="captureBtn" class="btn btn-primary" onclick="startCapture()">📸 START SHOOT</button>
+        <div style="display: flex; gap: 15px; width: 100%; max-width: 500px; margin-top: 20px;">
+            <button id="captureBtn" class="btn btn-primary" onclick="startCapture()">📸 TAKE PHOTO</button>
             <button class="btn btn-outline" onclick="endSession()" id="cancelBtn">Cancel</button>
         </div>
 
@@ -178,23 +241,23 @@
     </div>
 
     <div id="result-screen" class="screen">
-        <h1 class="title" style="font-size: 2rem;">SUCCESS!</h1>
-        <p id="uploadStatus">Nai-save na ang picture mo.</p>
-        
-        <img id="finalResultImg" src="" alt="Your Photo">
+        <h1 class="title" id="resultTitle" style="font-size: 2.5rem;">UPLOADING...</h1>
+        <p id="uploadStatus" style="font-size: 1.2rem; margin-bottom: 30px;">Please wait while we save your picture to the server.</p>
 
-        <button class="btn btn-primary" onclick="showPasswordModal()">📸 TAKE ANOTHER PHOTO</button>
-        <button class="btn btn-danger" onclick="endSession()">🚪 END SESSION</button>
+        <div id="success-buttons" style="display:none; width: 100%; align-items: center; flex-direction: column;">
+            <button class="btn btn-primary" onclick="showPasswordModal()">📸 TAKE ANOTHER PHOTO</button>
+            <button class="btn btn-danger" onclick="endSession()">🚪 END SESSION</button>
+        </div>
     </div>
 
     <div id="pass-modal" class="modal-overlay">
         <div class="modal-box">
-            <h2>Enter Password</h2>
-            <p style="font-size: 0.9rem; color: #ccc;">Kailangan ng password para maka-ulit.</p>
+            <h2 style="margin-top:0; color: var(--primary);">Enter Password</h2>
+            <p style="font-size: 0.95rem; color: #aaa;">Authorized access required to restart.</p>
             <input type="password" id="sessionPassword" placeholder="Enter password...">
-            <button class="btn btn-primary" onclick="verifyPassword()">Continue</button>
-            <button class="btn btn-outline" onclick="closePasswordModal()" style="margin-top: 10px; padding: 10px;">Cancel</button>
-            <p id="passError" style="color: #ff4757; font-size: 0.8rem; display: none; margin-top: 10px;">Maling password!</p>
+            <button class="btn btn-primary" onclick="verifyPassword()" style="margin-top: 10px;">Continue</button>
+            <button class="btn btn-outline" onclick="closePasswordModal()" style="margin-top: 10px;">Cancel</button>
+            <p id="passError" style="color: #ff4757; font-size: 0.9rem; display: none; margin-top: 15px; font-weight: bold;">Incorrect password!</p>
         </div>
     </div>
 
@@ -202,6 +265,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDrTbjnBeyNTQZU3hkaGfnXESvOKaQBIKk",
             authDomain: "photobooth-d94d3.firebaseapp.com",
@@ -210,25 +274,24 @@
             messagingSenderId: "557746814376",
             appId: "1:557746814376:web:fb4e9379767db0c39ab19d"
         };
+
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
-        // --- FRAME ASSETS (MGA TRANSPARENT PNG / SVG) ---
-        // Ginawa ko itong data URIs (SVG) para gumana agad kahit wala kang naka-save na images.
-        // Pwede mo itong palitan ng URL ng sarili mong transparent PNGs, ex: './frames/kasalan.png'
-        const framesData = {
-            wedding: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect x="20" y="20" width="760" height="560" fill="none" stroke="%23FFD700" stroke-width="20"/><text x="400" y="550" font-family="Arial" font-size="40" fill="%23FFD700" text-anchor="middle" font-weight="bold">Happy Wedding</text></svg>`,
-            floral: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect x="15" y="15" width="770" height="570" fill="none" stroke="%2332CD32" stroke-width="25"/><circle cx="50" cy="50" r="40" fill="%23FF69B4"/><circle cx="750" cy="50" r="40" fill="%23FF69B4"/><circle cx="50" cy="550" r="40" fill="%23FF69B4"/><circle cx="750" cy="550" r="40" fill="%23FF69B4"/></svg>`,
-            cartoon: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect x="15" y="15" width="770" height="570" fill="none" stroke="%23000" stroke-width="20" stroke-dasharray="30, 15"/><text x="400" y="80" font-family="Comic Sans MS" font-size="50" fill="%23FF4500" text-anchor="middle" font-weight="bold">BOOM!</text></svg>`
-        };
-
-        window.config = { layout: 'single', frameTheme: 'wedding' };
+        // STATE VARIABLES
+        window.config = { layout: 'single', frameSrc: null };
         let streamActive = null;
 
+        // ELEMENTS
         const video = document.getElementById('camera');
+        const overlayImg = document.getElementById('live-overlay');
         const canvas = document.getElementById('processCanvas');
         const ctx = canvas.getContext('2d');
-        const liveFrame = document.getElementById('live-frame');
+        const countdownEl = document.getElementById('countdown');
+        const flashEl = document.getElementById('flash');
+        const shotCounter = document.getElementById('shot-counter');
+        const captureBtn = document.getElementById('captureBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
 
         // --- UI SELECTIONS ---
         window.selectLayout = (type) => {
@@ -238,32 +301,60 @@
             document.getElementById(`layout-${type}`).classList.add('active');
         };
 
-        window.selectFrame = (theme) => {
-            config.frameTheme = theme;
-            document.querySelectorAll('[id^="frame-"]').forEach(el => el.classList.remove('active'));
-            document.getElementById(`frame-${theme}`).classList.add('active');
+        window.selectFrame = (srcUrl, cardId) => {
+            document.querySelectorAll('#frame-selection .card').forEach(c => c.classList.remove('active'));
+            
+            if (srcUrl === 'none') {
+                config.frameSrc = null;
+                document.getElementById('frame-none').classList.add('active');
+            } else {
+                config.frameSrc = srcUrl;
+                if(cardId) document.getElementById(cardId).classList.add('active');
+                else event.currentTarget.classList.add('active'); // fallback
+            }
         };
 
+        // Handle Custom Frame Upload
+        document.getElementById('customFrameUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Set as the active frame
+                    selectFrame(event.target.result);
+                    // Add active class manually to the upload card
+                    document.querySelectorAll('#frame-selection .card').forEach(c => c.classList.remove('active'));
+                    e.target.parentElement.classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // --- NAVIGATION ---
         window.switchScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
         };
 
-        // --- CAMERA CONTROLS ---
         window.openCamera = async () => {
             switchScreen('booth-screen');
-            // I-set yung frame image sa live preview
-            liveFrame.src = framesData[config.frameTheme]; 
+            captureBtn.style.display = 'block';
+            cancelBtn.style.display = 'block';
+            shotCounter.style.display = 'none';
 
-            document.getElementById('captureBtn').style.display = 'block';
-            document.getElementById('cancelBtn').style.display = 'block';
-            document.getElementById('shot-counter').style.display = 'none';
+            // Apply the chosen frame overlay to the live camera
+            if (config.frameSrc) {
+                overlayImg.src = config.frameSrc;
+                overlayImg.style.display = 'block';
+            } else {
+                overlayImg.style.display = 'none';
+            }
 
             try {
                 streamActive = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } } });
                 video.srcObject = streamActive;
             } catch (err) {
-                document.getElementById('boothStatusText').innerText = "Error: Baka walang camera o walang permission.";
+                alert("Error sa camera. Paki-check ang permissions.");
             }
         };
 
@@ -272,92 +363,113 @@
             switchScreen('setup-screen');
         };
 
-        // --- CAPTURE LOGIC ---
+        // --- CAPTURE & UPLOAD LOGIC ---
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
         const playCountdown = async () => {
-            const cd = document.getElementById('countdown');
-            const flash = document.getElementById('flash');
-            cd.style.opacity = '1';
-            for (let i = 3; i > 0; i--) { cd.innerText = i; await sleep(1000); }
-            cd.style.opacity = '0';
-            flash.style.opacity = '1';
-            setTimeout(() => { flash.style.opacity = '0'; }, 150);
-        };
-
-        // Load image as promise para sure na ma-draw sa canvas
-        const loadFrameImage = (src) => {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => resolve(img);
-                img.src = src;
-            });
+            countdownEl.style.opacity = '1';
+            for (let i = 3; i > 0; i--) {
+                countdownEl.innerText = i;
+                await sleep(1000);
+            }
+            countdownEl.style.opacity = '0';
+            
+            flashEl.style.opacity = '1';
+            setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
         window.startCapture = async () => {
-            document.getElementById('captureBtn').style.display = 'none';
-            document.getElementById('cancelBtn').style.display = 'none';
+            captureBtn.style.display = 'none';
+            cancelBtn.style.display = 'none';
             
-            const frameImg = await loadFrameImage(framesData[config.frameTheme]);
+            // Helper function to draw frame over video
+            const drawCurrentFrameToCanvas = async (destCtx, x, y, w, h) => {
+                // Draw Video
+                destCtx.drawImage(video, x, y, w, h);
+                // Draw Overlay if exists
+                if (config.frameSrc) {
+                    const img = new Image();
+                    img.src = config.frameSrc;
+                    await new Promise(r => { img.onload = r; });
+                    destCtx.drawImage(img, x, y, w, h);
+                }
+            };
 
             if (config.layout === 'single') {
                 canvas.width = 800; canvas.height = 600;
                 await playCountdown();
-                
-                // 1. I-draw ang video
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                // 2. I-draw ang frame overlay sa ibabaw
-                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                
-                await processAndUpload();
+                await drawCurrentFrameToCanvas(ctx, 0, 0, canvas.width, canvas.height);
+                await uploadToFirebase();
 
             } else {
-                canvas.width = 400; canvas.height = 1200;
-                ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                document.getElementById('shot-counter').style.display = 'block';
+                // 3-PHOTO STRIP
+                canvas.width = 400; canvas.height = 1200; 
+                ctx.fillStyle = "#ffffff"; // White background for strip
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                shotCounter.style.display = 'block';
 
                 for (let i = 0; i < 3; i++) {
-                    document.getElementById('shot-counter').innerText = `Shot ${i + 1} of 3`;
+                    shotCounter.innerText = `Shot ${i + 1} of 3`;
                     await playCountdown();
-                    const yOffset = (i * 390) + 10; 
-                    ctx.drawImage(video, 10, yOffset, 380, 380); 
-                    await sleep(1000);
+                    
+                    const yOffset = (i * 390) + 15; // Gap computations
+                    await drawCurrentFrameToCanvas(ctx, 15, yOffset, 370, 370);
+                    
+                    if (i < 2) await sleep(1000); 
                 }
-                
-                // I-draw yung frame overlay sa kabuuan ng strip
-                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
-                
-                document.getElementById('shot-counter').style.display = 'none';
-                await processAndUpload();
+                shotCounter.style.display = 'none';
+                await uploadToFirebase();
             }
         };
 
-        const processAndUpload = async () => {
-            document.getElementById('boothStatusText').innerText = "Pinoproseso ang litrato...";
-            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            
-            // Ipakita agad sa screen yung picture
-            document.getElementById('finalResultImg').src = imageDataUrl;
+        const uploadToFirebase = async () => {
             switchScreen('result-screen');
-            document.getElementById('uploadStatus').innerText = "Naka-save sa Firebase (Background Process).";
+            document.getElementById('resultTitle').innerText = "UPLOADING...";
+            document.getElementById('resultTitle').style.color = "var(--text)";
+            document.getElementById('uploadStatus').innerText = "Saving your masterpiece to the cloud...";
+            document.getElementById('success-buttons').style.display = 'none';
 
-            // Firebase Upload (Optional: In background para mabilis sa user)
+            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9); // Mataas na quality
             const fileName = `photos/booth_${Date.now()}.jpg`;
             const storageRef = ref(storage, fileName);
-            uploadString(storageRef, imageDataUrl, 'data_url').catch(err => console.error("Firebase error:", err));
+
+            try {
+                // WALANG PREVIEW, UPLOAD AGAD
+                await uploadString(storageRef, imageDataUrl, 'data_url');
+                
+                // KUNG SUCCESS:
+                document.getElementById('resultTitle').innerText = "SUCCESS!";
+                document.getElementById('resultTitle').style.color = "#28a745";
+                document.getElementById('uploadStatus').innerText = "Photo saved securely to your Firebase Storage.";
+                document.getElementById('success-buttons').style.display = 'flex';
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById('resultTitle').innerText = "ERROR!";
+                document.getElementById('resultTitle').style.color = "#ff4757";
+                document.getElementById('uploadStatus').innerText = "Upload failed. Please check internet connection or Firebase rules.";
+                document.getElementById('success-buttons').style.display = 'flex';
+            }
         };
 
-        // --- PASSWORD MODAL LOGIC ---
+        // --- PASSWORD SECURITY ---
         const ACTUAL_PASSWORD = "PRIME2026";
+
         window.showPasswordModal = () => {
             document.getElementById('pass-modal').style.display = 'flex';
             document.getElementById('sessionPassword').value = '';
             document.getElementById('passError').style.display = 'none';
         };
-        window.closePasswordModal = () => document.getElementById('pass-modal').style.display = 'none';
+
+        window.closePasswordModal = () => {
+            document.getElementById('pass-modal').style.display = 'none';
+        };
+
         window.verifyPassword = () => {
-            if (document.getElementById('sessionPassword').value === ACTUAL_PASSWORD) {
-                closePasswordModal(); switchScreen('setup-screen');
+            const input = document.getElementById('sessionPassword').value;
+            if (input === ACTUAL_PASSWORD) {
+                closePasswordModal();
+                endSession(); // Patayin camera at balik sa start
             } else {
                 document.getElementById('passError').style.display = 'block';
             }
