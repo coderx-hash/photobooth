@@ -104,16 +104,35 @@
         .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; }
         .video-wrapper { position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s; max-height: 65vh; }
         
-        /* EXACT ASPECT RATIOS para mag-match sa high res canvas size */
         .video-wrapper.landscape { aspect-ratio: 4/3; }
         .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 450px; margin: 0 auto; } 
 
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
-        .frame-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; z-index: 10; }
+        
+        /* MOVABLE & RESIZABLE OVERLAY CSS */
+        .frame-overlay { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); /* Centered scaling and moving */
+            width: 100%; 
+            height: auto; 
+            pointer-events: auto; /* Allows dragging */
+            cursor: grab; 
+            z-index: 10; 
+        }
+        .frame-overlay:active { cursor: grabbing; }
+
+        /* OVERLAY SIZE SLIDER CONTAINER */
+        #overlay-controls {
+            width: 100%; max-width: 650px; margin-top: 15px; 
+            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); 
+            padding: 15px; border-radius: 16px; text-align: center;
+        }
 
         /* Controls */
-        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 30px; justify-content: center; }
+        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 20px; justify-content: center; }
         .controls-row .btn { flex: 1 1 200px; }
 
         .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: clamp(6rem, 20vw, 15rem); font-weight: 900; color: white; text-shadow: 0px 10px 40px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20; }
@@ -165,9 +184,15 @@
             
             <div class="video-wrapper landscape" id="vid-wrapper">
                 <video id="camera" playsinline autoplay></video>
-                <img id="live-overlay" class="frame-overlay" src="" style="display:none;">
+                <img id="live-overlay" class="frame-overlay" src="" style="display:none;" draggable="false">
                 <div id="countdown" class="countdown-overlay">3</div>
                 <div id="flash" class="flash"></div>
+            </div>
+
+            <div id="overlay-controls" style="display:none;">
+                <p style="margin-bottom: 10px; font-size: 0.95rem; font-weight: 600; color: var(--text-main);">🖼️ Resize your PNG</p>
+                <input type="range" id="overlaySize" min="10" max="200" value="100" style="width: 80%; cursor: pointer;">
+                <p style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">Drag the image above to move it around</p>
             </div>
 
             <div class="controls-row" id="booth-controls">
@@ -236,6 +261,53 @@
         const flashEl = document.getElementById('flash');
         const boothControls = document.getElementById('booth-controls');
 
+        // --- OVERLAY RESIZE SLIDER ---
+        document.getElementById('overlaySize').addEventListener('input', function(e) {
+            overlayImg.style.width = e.target.value + '%';
+        });
+
+        // --- OVERLAY DRAG LOGIC ---
+        function makeOverlayDraggable(el) {
+            let isDragging = false, startX, startY, initialLeft, initialTop;
+
+            const dragStart = (e) => {
+                isDragging = true;
+                if (e.type === "touchstart") { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }
+                else { startX = e.clientX; startY = e.clientY; }
+
+                const style = window.getComputedStyle(el);
+                initialLeft = parseFloat(style.left);
+                initialTop = parseFloat(style.top);
+                el.style.cursor = 'grabbing';
+            };
+
+            const dragMove = (e) => {
+                if (!isDragging) return;
+                e.preventDefault(); // Prevents page scroll when dragging
+                let currentX, currentY;
+                if (e.type === "touchmove") { currentX = e.touches[0].clientX; currentY = e.touches[0].clientY; }
+                else { currentX = e.clientX; currentY = e.clientY; }
+
+                let dx = currentX - startX;
+                let dy = currentY - startY;
+
+                el.style.left = `${initialLeft + dx}px`;
+                el.style.top = `${initialTop + dy}px`;
+            };
+
+            const dragEnd = () => { isDragging = false; el.style.cursor = 'grab'; };
+
+            el.addEventListener('mousedown', dragStart);
+            el.addEventListener('touchstart', dragStart, {passive: false});
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('touchmove', dragMove, {passive: false});
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchend', dragEnd);
+        }
+        
+        // Initialize dragging for the overlay
+        makeOverlayDraggable(overlayImg);
+
         // --- NAVIGATION ---
         window.switchScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -256,11 +328,8 @@
             document.querySelectorAll('.frame-option').forEach(c => c.classList.remove('active'));
             if (srcUrl === 'none') {
                 config.frameSrc = null;
-                overlayImg.style.display = 'none';
             } else {
                 config.frameSrc = srcUrl;
-                overlayImg.src = srcUrl;
-                overlayImg.style.display = 'block';
             }
             if(cardElement) cardElement.classList.add('active');
         };
@@ -290,15 +359,22 @@
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
 
+            // Setup Overlay Display & Reset Position
             if (config.frameSrc) {
                 overlayImg.src = config.frameSrc;
                 overlayImg.style.display = 'block';
+                overlayImg.style.width = '100%';
+                overlayImg.style.top = '50%';
+                overlayImg.style.left = '50%';
+                document.getElementById('overlaySize').value = 100;
+                document.getElementById('overlay-controls').style.display = 'block';
             } else {
                 overlayImg.style.display = 'none';
+                document.getElementById('overlay-controls').style.display = 'none';
             }
 
             try {
-                // Pinilit natin kumuha ng pinaka malinaw (1080p High Res)
+                // High Res Request
                 const constraints = { video: { facingMode: "user", width: { ideal: 1920 }, height: { ideal: 1080 } } };
                 streamActive = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = streamActive;
@@ -322,9 +398,10 @@
         // --- SNAP & EXACT RENDER (WYSIWYG) ---
         window.startCapture = async () => {
             boothControls.style.display = 'none';
+            document.getElementById('overlay-controls').style.display = 'none';
             await playCountdown();
             
-            // TINAASAN ANG RESOLUTION (High Res: 1600x1200 or 1200x1600)
+            // High Resolution Settings
             if (config.orientation === 'landscape') { 
                 tempCanvas.width = 1600; 
                 tempCanvas.height = 1200; 
@@ -338,34 +415,48 @@
             const videoW = video.videoWidth;
             const videoH = video.videoHeight;
             
-            // Exact "object-fit: cover" math para sa canvas 
-            // Wala ng squish, wala ng shrink!
+            // Exact "object-fit: cover" center crop match
             const scale = Math.max(canvasW / videoW, canvasH / videoH);
             const drawW = videoW * scale;
             const drawH = videoH * scale;
-            
-            // I-center crop gaya sa HTML
             const startX = (canvasW - drawW) / 2;
             const startY = (canvasH - drawH) / 2;
 
             tempCtx.save();
-            // Mirror image handling
             tempCtx.translate(canvasW, 0);
             tempCtx.scale(-1, 1);
-            
-            // Draw cropped video exactly as seen in preview
             tempCtx.drawImage(video, startX, startY, drawW, drawH);
             tempCtx.restore();
 
-            // Draw Overlay PNG
+            // Perfect Resize & Placement Logic for Custom PNG Overlay
             if (config.frameSrc) {
                 const img = new Image();
                 img.src = config.frameSrc;
                 await new Promise(r => { img.onload = r; });
-                tempCtx.drawImage(img, 0, 0, canvasW, canvasH);
+
+                const wrapperRect = vidWrapper.getBoundingClientRect();
+                const elRect = overlayImg.getBoundingClientRect();
+
+                const scaleX = canvasW / wrapperRect.width;
+                const scaleY = canvasH / wrapperRect.height;
+
+                // Hanapin kung saan exactly ang center ng image inside the wrapper box
+                const centerX = elRect.left + (elRect.width / 2);
+                const centerY = elRect.top + (elRect.height / 2);
+
+                const relativeX = centerX - wrapperRect.left;
+                const relativeY = centerY - wrapperRect.top;
+
+                // Scale up sa size ng High-Res canvas
+                const finalX = relativeX * scaleX;
+                const finalY = relativeY * scaleY;
+                const imgDrawW = elRect.width * scaleX;
+                const imgDrawH = elRect.height * scaleY;
+
+                tempCtx.drawImage(img, finalX - (imgDrawW / 2), finalY - (imgDrawH / 2), imgDrawW, imgDrawH);
             }
             
-            currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); // 1.0 Maximum Quality
+            currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); 
             previewImg.src = currentPhotoDataUrl;
             switchScreen('preview-screen');
         };
@@ -375,6 +466,7 @@
             previewImg.src = "";
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
+            if(config.frameSrc) document.getElementById('overlay-controls').style.display = 'block';
         };
 
         window.savePhoto = async () => {
@@ -408,7 +500,6 @@
             }
         };
 
-        // Direktang babalik sa Start / Setup screen nang walang password
         window.startNewSession = () => {
             currentPhotoDataUrl = null;
             endSession();
