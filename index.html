@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Photo Booth</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px; }
+        .booth-container { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        video, canvas { border: 3px solid #333; border-radius: 10px; max-width: 100%; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #218838; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        #qrcode { margin-top: 20px; padding: 10px; background: white; display: inline-block; border-radius: 10px; }
+        #statusText { font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+
+    <h1>📸 Firebase Photo Booth</h1>
+
+    <div class="booth-container">
+        <video id="camera" width="400" height="300" autoplay></video>
+        <button id="captureBtn">Take Photo & Get QR</button>
+        <canvas id="snapshot" width="400" height="300" style="display: none;"></canvas>
+        <div id="qrcode"></div>
+        <p id="statusText">Bukas ang camera...</p>
+    </div>
+
+    <script type="module">
+        // 1. IMPORT FIREBASE MODULES
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+
+        // 2. ANG IYONG FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrTbjnBeyNTQZU3hkaGfnXESvOKaQBIKk",
+            authDomain: "photobooth-d94d3.firebaseapp.com",
+            projectId: "photobooth-d94d3",
+            storageBucket: "photobooth-d94d3.firebasestorage.app",
+            messagingSenderId: "557746814376",
+            appId: "1:557746814376:web:fb4e9379767db0c39ab19d",
+            measurementId: "G-LLHNVJHNBD"
+        };
+
+        // Initialize Firebase at Storage
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        // UI Elements
+        const video = document.getElementById('camera');
+        const canvas = document.getElementById('snapshot');
+        const ctx = canvas.getContext('2d');
+        const captureBtn = document.getElementById('captureBtn');
+        const qrcodeDiv = document.getElementById('qrcode');
+        const statusText = document.getElementById('statusText');
+
+        // 3. I-CONNECT ANG CAMERA
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => { video.srcObject = stream; })
+            .catch((err) => { statusText.innerText = "Error sa camera: " + err; });
+
+        // 4. CAPTURE AT UPLOAD LOGIC
+        captureBtn.addEventListener('click', async () => {
+            // Disable button habang nag-uupload para iwas double click
+            captureBtn.disabled = true;
+            statusText.innerText = "Kinukuha ang picture...";
+
+            // Draw video frame to canvas
+            canvas.style.display = "block";
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas to Data URL (Base64)
+            const imageDataUrl = canvas.toDataURL('image/png');
+
+            // Setup Firebase Storage Reference (Gagawa ng folder na 'photos')
+            const fileName = `photos/photo_${Date.now()}.png`;
+            const storageRef = ref(storage, fileName);
+
+            statusText.innerText = "Ina-upload sa Firebase Storage...";
+
+            try {
+                // Upload sa Firebase
+                await uploadString(storageRef, imageDataUrl, 'data_url');
+                
+                // Kunin ang totoong link ng na-upload na picture
+                const downloadURL = await getDownloadURL(storageRef);
+                
+                // 5. I-GENERATE ANG QR CODE GAMIT ANG TOTOONG LINK
+                qrcodeDiv.innerHTML = "";
+                new QRCode(qrcodeDiv, {
+                    text: downloadURL,
+                    width: 150,
+                    height: 150
+                });
+
+                statusText.innerText = "Success! I-scan ang QR code para ma-download.";
+            } catch (error) {
+                console.error("Upload error:", error);
+                statusText.innerText = "Error sa pag-upload. Naka-set up ba ang Storage Rules mo?";
+            } finally {
+                captureBtn.disabled = false; // I-enable ulit ang button
+            }
+        });
+    </script>
+</body>
+</html>
