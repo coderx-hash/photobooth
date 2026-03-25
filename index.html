@@ -16,7 +16,7 @@
         }
 
         body { 
-            font-family: 'Poppins', 'Segoe UI', Tahoma, sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             text-align: center; 
             background: linear-gradient(135deg, #0f0f13, #1a1a24);
             color: var(--text);
@@ -45,13 +45,8 @@
 
         /* --- SCREENS --- */
         .screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 900px;
-            padding: 20px;
-            box-sizing: border-box;
+            display: none; flex-direction: column; align-items: center;
+            width: 100%; max-width: 900px; padding: 20px; box-sizing: border-box;
             animation: fadeIn 0.4s ease-out forwards;
         }
         .screen.active { display: flex; }
@@ -65,39 +60,25 @@
         .section-title { font-weight: 600; margin: 25px 0 15px; width: 100%; text-align: left; color: var(--primary); font-size: 1.2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;}
         
         .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            width: 100%;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; width: 100%;
         }
 
         .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 20px 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
+            background: var(--glass-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius: 15px;
+            padding: 15px 10px; cursor: pointer; transition: all 0.3s ease;
+            display: flex; flex-direction: column; align-items: center; position: relative;
         }
 
-        .card:hover { transform: translateY(-5px); background: rgba(50, 50, 60, 0.8); }
+        .card:hover { transform: translateY(-4px); background: rgba(50, 50, 60, 0.8); }
         .card.active { 
-            border-color: var(--primary); 
-            background: rgba(243, 183, 0, 0.15); 
-            box-shadow: 0 0 20px var(--primary-glow); 
+            border-color: var(--primary); background: rgba(243, 183, 0, 0.15); 
+            box-shadow: 0 0 15px var(--primary-glow); 
         }
         
-        .card img.preview-thumb { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
-        .card .icon { font-size: 32px; margin-bottom: 10px; }
-        .card p { margin: 0; font-size: 0.95rem; font-weight: 500; }
+        .card .icon { font-size: 28px; margin-bottom: 8px; }
+        .card p { margin: 0; font-size: 0.9rem; font-weight: 600; }
 
-        /* --- UPLOAD BUTTON IN GRID --- */
         .upload-card { border: 1px dashed var(--primary); background: transparent; }
         .upload-card:hover { background: rgba(243, 183, 0, 0.1); }
         input[type="file"] { display: none; }
@@ -105,11 +86,10 @@
         /* --- BUTTONS --- */
         .btn {
             background: var(--text); color: var(--dark-bg);
-            font-size: 1.2rem; font-weight: 800; padding: 15px 40px;
+            font-size: 1.1rem; font-weight: 800; padding: 15px 35px;
             border-radius: 50px; border: none; cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            transition: all 0.2s; margin-top: 20px; width: 100%; max-width: 350px;
-            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: all 0.2s; 
+            margin-top: 20px; width: 100%; max-width: 350px; text-transform: uppercase;
         }
         .btn:hover { transform: scale(1.03); box-shadow: 0 10px 25px rgba(255,255,255,0.2); }
         .btn:active { transform: scale(0.97); }
@@ -121,26 +101,21 @@
 
         /* --- CAMERA & LIVE OVERLAY --- */
         .video-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 2px solid var(--glass-border);
-            background: #000;
-            aspect-ratio: 4/3;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            position: relative; width: 100%; max-width: 800px;
+            border-radius: 20px; overflow: hidden; border: 2px solid var(--glass-border);
+            background: #000; box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            transition: aspect-ratio 0.3s ease;
         }
 
-        video { width: 100%; height: 100%; object-fit: cover; }
+        /* DEFAULT LANDSCAPE. JS WILL CHANGE THIS TO 3/4 IF PORTRAIT IS SELECTED */
+        .video-wrapper.landscape { aspect-ratio: 4/3; }
+        .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 500px; }
+
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* Mirror effect */ }
         
-        /* ITO YUNG LIVE FRAME OVERLAY */
         .frame-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; /* Para sumakto yung design sa screen */
-            pointer-events: none; /* Para hindi ma-block yung clicks sa video kung meron man */
-            z-index: 10;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; pointer-events: none; z-index: 10;
         }
 
         .countdown-overlay {
@@ -156,24 +131,28 @@
             background: white; opacity: 0; pointer-events: none; z-index: 30;
         }
 
-        /* --- MODAL --- */
+        /* --- INTERSTITIAL (NEXT SHOT) MODAL --- */
+        .interstitial-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(8px);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 40; padding: 20px; box-sizing: border-box; text-align: center;
+        }
+
+        /* --- RESULT / UPLOAD SCREEN --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9); display: none;
-            align-items: center; justify-content: center; z-index: 1000;
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000;
         }
         .modal-box {
             background: var(--dark-bg); padding: 40px; border-radius: 20px;
             border: 1px solid var(--primary); width: 90%; max-width: 400px; text-align: center;
-            box-shadow: 0 0 30px rgba(243, 183, 0, 0.2);
         }
         .modal-box input {
             width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px;
             border: 1px solid #444; background: #1a1a24; color: white;
             font-size: 1.2rem; text-align: center; box-sizing: border-box; outline: none;
         }
-        .modal-box input:focus { border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -182,7 +161,17 @@
         <h1 class="title">PRIME DUO</h1>
         <p class="subtitle">Customize Your Session</p>
         
-        <div class="section-title">1. Choose Layout</div>
+        <div class="section-title">1. Orientation</div>
+        <div class="grid-container">
+            <div class="card active" onclick="selectOrientation('landscape')" id="ori-landscape">
+                <span class="icon">🖥️</span><p>Landscape (Pahiga)</p>
+            </div>
+            <div class="card" onclick="selectOrientation('portrait')" id="ori-portrait">
+                <span class="icon">📱</span><p>Portrait (Patayo)</p>
+            </div>
+        </div>
+
+        <div class="section-title">2. Choose Layout</div>
         <div class="grid-container">
             <div class="card active" onclick="selectLayout('single')" id="layout-single">
                 <span class="icon">🖼️</span><p>1 Shot (Full)</p>
@@ -192,24 +181,20 @@
             </div>
         </div>
 
-        <div class="section-title">2. Choose Overlay Frame</div>
+        <div class="section-title">3. Starting Frame</div>
         <div class="grid-container" id="frame-selection">
-            <div class="card active" onclick="selectFrame('none')" id="frame-none">
+            <div class="card active frame-option" onclick="selectFrame('none', this)">
                 <span class="icon">🚫</span><p>No Frame</p>
             </div>
-            
-            <div class="card" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png')" id="frame-wedding">
-                <span class="icon">💍</span><p>Kasalan Frame</p>
+            <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
+                <span class="icon">💍</span><p>Kasalan</p>
             </div>
-
-            <div class="card" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png')" id="frame-cartoon">
+            <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
                 <span class="icon">🦄</span><p>Cartoons</p>
             </div>
-
-            <div class="card" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png')" id="frame-flowers">
-                <span class="icon">🌸</span><p>Flower Border</p>
+            <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
+                <span class="icon">🌸</span><p>Flowers</p>
             </div>
-
             <label class="card upload-card" for="customFrameUpload">
                 <span class="icon">⬆️</span><p>Upload Design</p>
                 <input type="file" id="customFrameUpload" accept="image/png">
@@ -223,26 +208,35 @@
         <h1 class="title" style="font-size: 2rem;">STRIKE A POSE!</h1>
         <p id="boothStatusText" style="color: var(--primary);">Ready...</p>
         
-        <div class="video-wrapper">
+        <div class="video-wrapper landscape" id="vid-wrapper">
             <video id="camera" playsinline autoplay></video>
             <img id="live-overlay" class="frame-overlay" src="" style="display:none;">
             <div id="countdown" class="countdown-overlay">3</div>
             <div id="flash" class="flash"></div>
+
+            <div id="interstitial-ui" class="interstitial-overlay">
+                <h2 style="margin-top:0; color:var(--primary);" id="interstitial-title">Nice Shot!</h2>
+                <p>Choose a frame for the NEXT shot:</p>
+                <div class="grid-container" id="interstitial-frame-selection" style="max-height: 50%; overflow-y: auto;">
+                    </div>
+                <button class="btn btn-primary" onclick="continueNextShot()" style="padding: 10px 20px; font-size: 1rem; margin-top: 15px;">▶️ NEXT SHOT</button>
+            </div>
         </div>
 
         <p id="shot-counter" style="font-size: 1.2rem; font-weight: bold; margin: 15px 0; display: none;">Shot 1 of 3</p>
 
-        <div style="display: flex; gap: 15px; width: 100%; max-width: 500px; margin-top: 20px;">
+        <div style="display: flex; gap: 15px; width: 100%; max-width: 500px; margin-top: 10px;" id="booth-controls">
             <button id="captureBtn" class="btn btn-primary" onclick="startCapture()">📸 TAKE PHOTO</button>
-            <button class="btn btn-outline" onclick="endSession()" id="cancelBtn">Cancel</button>
+            <button class="btn btn-outline" onclick="endSession()">Cancel</button>
         </div>
 
-        <canvas id="processCanvas" style="display:none;"></canvas>
+        <canvas id="tempCanvas" style="display:none;"></canvas>
+        <canvas id="finalCanvas" style="display:none;"></canvas>
     </div>
 
     <div id="result-screen" class="screen">
         <h1 class="title" id="resultTitle" style="font-size: 2.5rem;">UPLOADING...</h1>
-        <p id="uploadStatus" style="font-size: 1.2rem; margin-bottom: 30px;">Please wait while we save your picture to the server.</p>
+        <p id="uploadStatus" style="font-size: 1.2rem; margin-bottom: 30px;">Saving your masterpiece securely...</p>
 
         <div id="success-buttons" style="display:none; width: 100%; align-items: center; flex-direction: column;">
             <button class="btn btn-primary" onclick="showPasswordModal()">📸 TAKE ANOTHER PHOTO</button>
@@ -253,11 +247,10 @@
     <div id="pass-modal" class="modal-overlay">
         <div class="modal-box">
             <h2 style="margin-top:0; color: var(--primary);">Enter Password</h2>
-            <p style="font-size: 0.95rem; color: #aaa;">Authorized access required to restart.</p>
             <input type="password" id="sessionPassword" placeholder="Enter password...">
             <button class="btn btn-primary" onclick="verifyPassword()" style="margin-top: 10px;">Continue</button>
             <button class="btn btn-outline" onclick="closePasswordModal()" style="margin-top: 10px;">Cancel</button>
-            <p id="passError" style="color: #ff4757; font-size: 0.9rem; display: none; margin-top: 15px; font-weight: bold;">Incorrect password!</p>
+            <p id="passError" style="color: #ff4757; display: none; margin-top: 15px; font-weight: bold;">Incorrect password!</p>
         </div>
     </div>
 
@@ -279,21 +272,36 @@
         const storage = getStorage(app);
 
         // STATE VARIABLES
-        window.config = { layout: 'single', frameSrc: null };
+        window.config = { orientation: 'landscape', layout: 'single', frameSrc: null };
         let streamActive = null;
+        let currentShotIndex = 0;
+        let capturedStripImages = [];
 
         // ELEMENTS
         const video = document.getElementById('camera');
+        const vidWrapper = document.getElementById('vid-wrapper');
         const overlayImg = document.getElementById('live-overlay');
-        const canvas = document.getElementById('processCanvas');
-        const ctx = canvas.getContext('2d');
+        const tempCanvas = document.getElementById('tempCanvas');
+        const finalCanvas = document.getElementById('finalCanvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        const finalCtx = finalCanvas.getContext('2d');
         const countdownEl = document.getElementById('countdown');
         const flashEl = document.getElementById('flash');
         const shotCounter = document.getElementById('shot-counter');
-        const captureBtn = document.getElementById('captureBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
+        const boothControls = document.getElementById('booth-controls');
+        const interstitialUI = document.getElementById('interstitial-ui');
 
         // --- UI SELECTIONS ---
+        window.selectOrientation = (type) => {
+            config.orientation = type;
+            document.getElementById('ori-landscape').classList.remove('active');
+            document.getElementById('ori-portrait').classList.remove('active');
+            document.getElementById(`ori-${type}`).classList.add('active');
+            
+            // Adjust Video Wrapper CSS
+            vidWrapper.className = `video-wrapper ${type}`;
+        };
+
         window.selectLayout = (type) => {
             config.layout = type;
             document.getElementById('layout-single').classList.remove('active');
@@ -301,36 +309,36 @@
             document.getElementById(`layout-${type}`).classList.add('active');
         };
 
-        window.selectFrame = (srcUrl, cardId) => {
-            document.querySelectorAll('#frame-selection .card').forEach(c => c.classList.remove('active'));
+        window.selectFrame = (srcUrl, cardElement) => {
+            // Remove active class from ALL frame options (both setup and interstitial)
+            document.querySelectorAll('.frame-option').forEach(c => c.classList.remove('active'));
             
             if (srcUrl === 'none') {
                 config.frameSrc = null;
-                document.getElementById('frame-none').classList.add('active');
+                overlayImg.style.display = 'none';
             } else {
                 config.frameSrc = srcUrl;
-                if(cardId) document.getElementById(cardId).classList.add('active');
-                else event.currentTarget.classList.add('active'); // fallback
+                overlayImg.src = srcUrl;
+                overlayImg.style.display = 'block';
             }
+            
+            // Highlight the clicked card
+            if(cardElement) cardElement.classList.add('active');
         };
 
-        // Handle Custom Frame Upload
+        // Sync File Upload to both menus
         document.getElementById('customFrameUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    // Set as the active frame
                     selectFrame(event.target.result);
-                    // Add active class manually to the upload card
-                    document.querySelectorAll('#frame-selection .card').forEach(c => c.classList.remove('active'));
-                    e.target.parentElement.classList.add('active');
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION & CAMERA ---
         window.switchScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
@@ -338,11 +346,17 @@
 
         window.openCamera = async () => {
             switchScreen('booth-screen');
-            captureBtn.style.display = 'block';
-            cancelBtn.style.display = 'block';
+            boothControls.style.display = 'flex';
+            interstitialUI.style.display = 'none';
             shotCounter.style.display = 'none';
+            currentShotIndex = 0;
+            capturedStripImages = [];
 
-            // Apply the chosen frame overlay to the live camera
+            // Clone frame options to interstitial UI so they can choose mid-shoot
+            const frameGrid = document.getElementById('frame-selection').innerHTML;
+            document.getElementById('interstitial-frame-selection').innerHTML = frameGrid;
+            
+            // Ensure overlay shows based on initial setup pick
             if (config.frameSrc) {
                 overlayImg.src = config.frameSrc;
                 overlayImg.style.display = 'block';
@@ -353,9 +367,7 @@
             try {
                 streamActive = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } } });
                 video.srcObject = streamActive;
-            } catch (err) {
-                alert("Error sa camera. Paki-check ang permissions.");
-            }
+            } catch (err) { alert("Error: Walang access sa camera."); }
         };
 
         window.endSession = () => {
@@ -363,91 +375,125 @@
             switchScreen('setup-screen');
         };
 
-        // --- CAPTURE & UPLOAD LOGIC ---
-        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+        // --- CAPTURE LOGIC ---
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
 
         const playCountdown = async () => {
             countdownEl.style.opacity = '1';
-            for (let i = 3; i > 0; i--) {
-                countdownEl.innerText = i;
-                await sleep(1000);
-            }
+            for (let i = 3; i > 0; i--) { countdownEl.innerText = i; await sleep(1000); }
             countdownEl.style.opacity = '0';
-            
             flashEl.style.opacity = '1';
             setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
-        window.startCapture = async () => {
-            captureBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
+        const captureSingleCanvas = async () => {
+            // Set canvas size based on orientation
+            if (config.orientation === 'landscape') { tempCanvas.width = 800; tempCanvas.height = 600; } 
+            else { tempCanvas.width = 600; tempCanvas.height = 800; }
             
-            // Helper function to draw frame over video
-            const drawCurrentFrameToCanvas = async (destCtx, x, y, w, h) => {
-                // Draw Video
-                destCtx.drawImage(video, x, y, w, h);
-                // Draw Overlay if exists
-                if (config.frameSrc) {
-                    const img = new Image();
-                    img.src = config.frameSrc;
-                    await new Promise(r => { img.onload = r; });
-                    destCtx.drawImage(img, x, y, w, h);
-                }
-            };
+            // Draw video (flip horizontally to match mirror preview)
+            tempCtx.save();
+            tempCtx.translate(tempCanvas.width, 0);
+            tempCtx.scale(-1, 1);
+            tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+            tempCtx.restore();
 
+            // Draw Overlay
+            if (config.frameSrc) {
+                const img = new Image();
+                img.src = config.frameSrc;
+                await new Promise(r => { img.onload = r; });
+                tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+            }
+            return tempCanvas.toDataURL('image/jpeg', 0.9);
+        };
+
+        window.startCapture = async () => {
+            boothControls.style.display = 'none'; // hide buttons
+            
             if (config.layout === 'single') {
-                canvas.width = 800; canvas.height = 600;
                 await playCountdown();
-                await drawCurrentFrameToCanvas(ctx, 0, 0, canvas.width, canvas.height);
-                await uploadToFirebase();
-
+                const finalImgData = await captureSingleCanvas();
+                await uploadToFirebase(finalImgData);
             } else {
-                // 3-PHOTO STRIP
-                canvas.width = 400; canvas.height = 1200; 
-                ctx.fillStyle = "#ffffff"; // White background for strip
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                // STRIP MODE LOGIC
                 shotCounter.style.display = 'block';
-
-                for (let i = 0; i < 3; i++) {
-                    shotCounter.innerText = `Shot ${i + 1} of 3`;
-                    await playCountdown();
-                    
-                    const yOffset = (i * 390) + 15; // Gap computations
-                    await drawCurrentFrameToCanvas(ctx, 15, yOffset, 370, 370);
-                    
-                    if (i < 2) await sleep(1000); 
-                }
-                shotCounter.style.display = 'none';
-                await uploadToFirebase();
+                await executeStripShot();
             }
         };
 
-        const uploadToFirebase = async () => {
+        const executeStripShot = async () => {
+            currentShotIndex++;
+            shotCounter.innerText = `Shot ${currentShotIndex} of 3`;
+            
+            await playCountdown();
+            const shotData = await captureSingleCanvas();
+            capturedStripImages.push(shotData);
+
+            if (currentShotIndex < 3) {
+                // Show Interstitial picker to let them change frame
+                document.getElementById('interstitial-title').innerText = `Shot ${currentShotIndex} Done!`;
+                interstitialUI.style.display = 'flex';
+            } else {
+                // All 3 shots done, stitch them!
+                shotCounter.style.display = 'none';
+                await stitchAndUploadStrip();
+            }
+        };
+
+        window.continueNextShot = () => {
+            interstitialUI.style.display = 'none';
+            executeStripShot(); // trigger next countdown
+        };
+
+        const stitchAndUploadStrip = async () => {
+            document.getElementById('boothStatusText').innerText = "Stitching photos...";
+            
+            const pWidth = config.orientation === 'landscape' ? 400 : 300;
+            const pHeight = config.orientation === 'landscape' ? 300 : 400;
+            const gap = 20;
+
+            finalCanvas.width = pWidth + (gap * 2);
+            finalCanvas.height = (pHeight * 3) + (gap * 4); // 3 images + top/bottom/middle gaps
+            
+            finalCtx.fillStyle = "#ffffff"; // White border background
+            finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+            // Draw the 3 saved images onto the tall canvas
+            for (let i = 0; i < 3; i++) {
+                const img = new Image();
+                img.src = capturedStripImages[i];
+                await new Promise(r => { img.onload = r; });
+                const yOffset = gap + (i * (pHeight + gap));
+                finalCtx.drawImage(img, gap, yOffset, pWidth, pHeight);
+            }
+
+            const finalData = finalCanvas.toDataURL('image/jpeg', 0.9);
+            await uploadToFirebase(finalData);
+        };
+
+        // --- FIREBASE UPLOAD ---
+        const uploadToFirebase = async (imageDataUrl) => {
             switchScreen('result-screen');
             document.getElementById('resultTitle').innerText = "UPLOADING...";
             document.getElementById('resultTitle').style.color = "var(--text)";
-            document.getElementById('uploadStatus').innerText = "Saving your masterpiece to the cloud...";
+            document.getElementById('uploadStatus').innerText = "Directly saving to Firebase without preview...";
             document.getElementById('success-buttons').style.display = 'none';
 
-            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9); // Mataas na quality
-            const fileName = `photos/booth_${Date.now()}.jpg`;
+            const fileName = `photos/booth_${config.layout}_${Date.now()}.jpg`;
             const storageRef = ref(storage, fileName);
 
             try {
-                // WALANG PREVIEW, UPLOAD AGAD
                 await uploadString(storageRef, imageDataUrl, 'data_url');
-                
-                // KUNG SUCCESS:
                 document.getElementById('resultTitle').innerText = "SUCCESS!";
                 document.getElementById('resultTitle').style.color = "#28a745";
-                document.getElementById('uploadStatus').innerText = "Photo saved securely to your Firebase Storage.";
+                document.getElementById('uploadStatus').innerText = "Your awesome photos are saved in the cloud!";
                 document.getElementById('success-buttons').style.display = 'flex';
-                
             } catch (error) {
                 console.error(error);
                 document.getElementById('resultTitle').innerText = "ERROR!";
                 document.getElementById('resultTitle').style.color = "#ff4757";
-                document.getElementById('uploadStatus').innerText = "Upload failed. Please check internet connection or Firebase rules.";
+                document.getElementById('uploadStatus').innerText = "Failed to save. Please check internet connection.";
                 document.getElementById('success-buttons').style.display = 'flex';
             }
         };
@@ -461,18 +507,12 @@
             document.getElementById('passError').style.display = 'none';
         };
 
-        window.closePasswordModal = () => {
-            document.getElementById('pass-modal').style.display = 'none';
-        };
+        window.closePasswordModal = () => { document.getElementById('pass-modal').style.display = 'none'; };
 
         window.verifyPassword = () => {
-            const input = document.getElementById('sessionPassword').value;
-            if (input === ACTUAL_PASSWORD) {
-                closePasswordModal();
-                endSession(); // Patayin camera at balik sa start
-            } else {
-                document.getElementById('passError').style.display = 'block';
-            }
+            if (document.getElementById('sessionPassword').value === ACTUAL_PASSWORD) {
+                closePasswordModal(); endSession();
+            } else { document.getElementById('passError').style.display = 'block'; }
         };
     </script>
 </body>
