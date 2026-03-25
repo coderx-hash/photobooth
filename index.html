@@ -107,11 +107,10 @@
             transition: aspect-ratio 0.3s ease;
         }
 
-        /* DEFAULT LANDSCAPE. JS WILL CHANGE THIS TO 3/4 IF PORTRAIT IS SELECTED */
         .video-wrapper.landscape { aspect-ratio: 4/3; }
         .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 500px; }
 
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); /* Mirror effect */ }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         
         .frame-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -186,6 +185,7 @@
             <div class="card active frame-option" onclick="selectFrame('none', this)">
                 <span class="icon">🚫</span><p>No Frame</p>
             </div>
+            
             <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
                 <span class="icon">💍</span><p>Kasalan</p>
             </div>
@@ -195,9 +195,10 @@
             <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
                 <span class="icon">🌸</span><p>Flowers</p>
             </div>
-            <label class="card upload-card" for="customFrameUpload">
+            
+            <label class="card upload-card frame-option" for="customFrameUploadSetup">
                 <span class="icon">⬆️</span><p>Upload Design</p>
-                <input type="file" id="customFrameUpload" accept="image/png">
+                <input type="file" id="customFrameUploadSetup" accept="image/png">
             </label>
         </div>
 
@@ -217,8 +218,26 @@
             <div id="interstitial-ui" class="interstitial-overlay">
                 <h2 style="margin-top:0; color:var(--primary);" id="interstitial-title">Nice Shot!</h2>
                 <p>Choose a frame for the NEXT shot:</p>
-                <div class="grid-container" id="interstitial-frame-selection" style="max-height: 50%; overflow-y: auto;">
+                
+                <div class="grid-container" style="max-height: 50%; overflow-y: auto; width: 100%;">
+                    <div class="card active frame-option" onclick="selectFrame('none', this)">
+                        <span class="icon">🚫</span><p>No Frame</p>
                     </div>
+                    <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
+                        <span class="icon">💍</span><p>Kasalan</p>
+                    </div>
+                    <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
+                        <span class="icon">🦄</span><p>Cartoons</p>
+                    </div>
+                    <div class="card frame-option" onclick="selectFrame('https://upload.wikimedia.org/wikipedia/commons/e/e4/A_transparent_rectangle.png', this)">
+                        <span class="icon">🌸</span><p>Flowers</p>
+                    </div>
+                    <label class="card upload-card frame-option" for="customFrameUploadMid">
+                        <span class="icon">⬆️</span><p>Upload Design</p>
+                        <input type="file" id="customFrameUploadMid" accept="image/png">
+                    </label>
+                </div>
+
                 <button class="btn btn-primary" onclick="continueNextShot()" style="padding: 10px 20px; font-size: 1rem; margin-top: 15px;">▶️ NEXT SHOT</button>
             </div>
         </div>
@@ -297,8 +316,6 @@
             document.getElementById('ori-landscape').classList.remove('active');
             document.getElementById('ori-portrait').classList.remove('active');
             document.getElementById(`ori-${type}`).classList.add('active');
-            
-            // Adjust Video Wrapper CSS
             vidWrapper.className = `video-wrapper ${type}`;
         };
 
@@ -310,7 +327,7 @@
         };
 
         window.selectFrame = (srcUrl, cardElement) => {
-            // Remove active class from ALL frame options (both setup and interstitial)
+            // Remove active class from ALL frame options across the whole app
             document.querySelectorAll('.frame-option').forEach(c => c.classList.remove('active'));
             
             if (srcUrl === 'none') {
@@ -322,21 +339,25 @@
                 overlayImg.style.display = 'block';
             }
             
-            // Highlight the clicked card
+            // Highlight the specific card clicked
             if(cardElement) cardElement.classList.add('active');
         };
 
-        // Sync File Upload to both menus
-        document.getElementById('customFrameUpload').addEventListener('change', function(e) {
+        // SHARED FILE UPLOAD HANDLER
+        const handleFileUpload = (e) => {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    selectFrame(event.target.result);
+                    selectFrame(event.target.result, e.target.parentElement);
                 };
                 reader.readAsDataURL(file);
             }
-        });
+        };
+
+        // Attach event listener to BOTH upload buttons
+        document.getElementById('customFrameUploadSetup').addEventListener('change', handleFileUpload);
+        document.getElementById('customFrameUploadMid').addEventListener('change', handleFileUpload);
 
         // --- NAVIGATION & CAMERA ---
         window.switchScreen = (screenId) => {
@@ -352,11 +373,6 @@
             currentShotIndex = 0;
             capturedStripImages = [];
 
-            // Clone frame options to interstitial UI so they can choose mid-shoot
-            const frameGrid = document.getElementById('frame-selection').innerHTML;
-            document.getElementById('interstitial-frame-selection').innerHTML = frameGrid;
-            
-            // Ensure overlay shows based on initial setup pick
             if (config.frameSrc) {
                 overlayImg.src = config.frameSrc;
                 overlayImg.style.display = 'block';
@@ -387,18 +403,15 @@
         };
 
         const captureSingleCanvas = async () => {
-            // Set canvas size based on orientation
             if (config.orientation === 'landscape') { tempCanvas.width = 800; tempCanvas.height = 600; } 
             else { tempCanvas.width = 600; tempCanvas.height = 800; }
             
-            // Draw video (flip horizontally to match mirror preview)
             tempCtx.save();
             tempCtx.translate(tempCanvas.width, 0);
             tempCtx.scale(-1, 1);
             tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
             tempCtx.restore();
 
-            // Draw Overlay
             if (config.frameSrc) {
                 const img = new Image();
                 img.src = config.frameSrc;
@@ -409,14 +422,13 @@
         };
 
         window.startCapture = async () => {
-            boothControls.style.display = 'none'; // hide buttons
+            boothControls.style.display = 'none';
             
             if (config.layout === 'single') {
                 await playCountdown();
                 const finalImgData = await captureSingleCanvas();
                 await uploadToFirebase(finalImgData);
             } else {
-                // STRIP MODE LOGIC
                 shotCounter.style.display = 'block';
                 await executeStripShot();
             }
@@ -431,11 +443,9 @@
             capturedStripImages.push(shotData);
 
             if (currentShotIndex < 3) {
-                // Show Interstitial picker to let them change frame
                 document.getElementById('interstitial-title').innerText = `Shot ${currentShotIndex} Done!`;
                 interstitialUI.style.display = 'flex';
             } else {
-                // All 3 shots done, stitch them!
                 shotCounter.style.display = 'none';
                 await stitchAndUploadStrip();
             }
@@ -443,7 +453,7 @@
 
         window.continueNextShot = () => {
             interstitialUI.style.display = 'none';
-            executeStripShot(); // trigger next countdown
+            executeStripShot(); 
         };
 
         const stitchAndUploadStrip = async () => {
@@ -454,12 +464,11 @@
             const gap = 20;
 
             finalCanvas.width = pWidth + (gap * 2);
-            finalCanvas.height = (pHeight * 3) + (gap * 4); // 3 images + top/bottom/middle gaps
+            finalCanvas.height = (pHeight * 3) + (gap * 4);
             
-            finalCtx.fillStyle = "#ffffff"; // White border background
+            finalCtx.fillStyle = "#ffffff";
             finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
 
-            // Draw the 3 saved images onto the tall canvas
             for (let i = 0; i < 3; i++) {
                 const img = new Image();
                 img.src = capturedStripImages[i];
