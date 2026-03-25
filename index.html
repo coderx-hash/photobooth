@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Prime Duo Photobooth</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         /* GLOBAL STYLES */
         :root {
@@ -19,36 +18,24 @@
             text-align: center; 
             background-color: var(--dark);
             color: var(--text);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        /* TYPOGRAPHY & GLITCH */
         h1.title {
             font-size: clamp(2rem, 5vw, 3rem);
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            letter-spacing: 2px; text-transform: uppercase;
             text-shadow: 2px 0px 0px rgba(255,0,0,0.8), -2px 0px 0px rgba(0,255,255,0.8);
             margin-bottom: 10px;
         }
 
         .subtitle { font-size: 1.1rem; margin-bottom: 20px; color: #ccc; }
 
-        /* CONTAINERS */
         .screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 800px;
-            padding: 20px;
-            box-sizing: border-box;
+            display: none; flex-direction: column; align-items: center;
+            width: 100%; max-width: 800px; padding: 20px; box-sizing: border-box;
             animation: fadeIn 0.5s ease-in-out;
         }
 
@@ -60,23 +47,14 @@
         .section-title { font-weight: bold; margin: 20px 0 10px; border-bottom: 2px solid #333; padding-bottom: 5px; width: 100%; text-align: left; }
         
         .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            width: 100%;
-            margin-bottom: 20px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px; width: 100%; margin-bottom: 20px;
         }
 
         .card {
-            background-color: var(--card-bg);
-            border: 2px solid #333;
-            border-radius: 12px;
-            padding: 20px 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: var(--card-bg); border: 2px solid #333; border-radius: 12px;
+            padding: 15px 10px; cursor: pointer; transition: all 0.3s;
+            display: flex; flex-direction: column; align-items: center;
         }
 
         .card:hover { transform: translateY(-3px); background-color: #2a2a2a; }
@@ -86,21 +64,12 @@
 
         /* BUTTONS */
         .btn {
-            background-color: var(--text);
-            color: var(--dark);
-            font-size: 1.1rem;
-            font-weight: 900;
-            padding: 15px 40px;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-            margin-top: 10px;
-            width: 100%;
-            max-width: 300px;
+            background-color: var(--text); color: var(--dark);
+            font-size: 1.1rem; font-weight: 900; padding: 15px 40px;
+            border-radius: 50px; border: none; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.2s;
+            margin-top: 10px; width: 100%; max-width: 300px;
         }
-
         .btn:hover { background-color: #e0e0e0; transform: scale(1.02); }
         .btn:active { transform: scale(0.95); }
         .btn-primary { background-color: var(--primary); }
@@ -110,43 +79,33 @@
         .btn-outline { background: transparent; border: 2px solid #555; color: white; }
         .btn-outline:hover { border-color: var(--primary); }
 
-        /* CAMERA BOOTH */
+        /* CAMERA BOOTH & LIVE FRAME OVERLAY */
         .video-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 600px;
-            border-radius: 15px;
-            overflow: hidden;
-            border: 4px solid #333;
-            background: #000;
-            aspect-ratio: 4/3;
+            position: relative; width: 100%; max-width: 600px;
+            border-radius: 10px; overflow: hidden; border: 4px solid #333;
+            background: #000; aspect-ratio: 4/3;
         }
 
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        .countdown-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 8rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0px 0px 20px rgba(0,0,0,0.8);
-            background: rgba(0,0,0,0.3);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
+        .frame-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Para hindi ma-block ang clicks sa video */
+            z-index: 5; object-fit: fill; 
         }
 
-        .flash {
-            position: absolute; top:0; left:0; width:100%; height:100%;
-            background: white; opacity: 0; pointer-events: none;
+        .countdown-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8rem; font-weight: bold; color: white;
+            text-shadow: 0px 0px 20px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3);
+            opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10;
         }
+
+        .flash { position: absolute; top:0; left:0; width:100%; height:100%; background: white; opacity: 0; pointer-events: none; z-index: 15; }
 
         /* RESULTS & MODALS */
-        #qrcode { margin: 20px auto; padding: 15px; background: white; border-radius: 10px; display: inline-block; }
+        #finalResultImg { max-width: 100%; border: 4px solid #fff; border-radius: 10px; margin: 20px 0; max-height: 50vh; object-fit: contain; }
         #statusText { color: var(--primary); font-weight: bold; min-height: 24px; margin: 15px 0; }
         
         .modal-overlay {
@@ -159,9 +118,8 @@
             border: 1px solid #444; width: 90%; max-width: 350px;
         }
         .modal-box input {
-            width: 100%; padding: 12px; margin: 15px 0;
-            border-radius: 8px; border: 1px solid #555;
-            background: #111; color: white; font-size: 1rem; box-sizing: border-box;
+            width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px;
+            border: 1px solid #555; background: #111; color: white; font-size: 1rem; box-sizing: border-box;
         }
     </style>
 </head>
@@ -181,16 +139,16 @@
             </div>
         </div>
 
-        <div class="section-title">2. Pumili ng Frame Color</div>
+        <div class="section-title">2. Pumili ng Frame Design</div>
         <div class="grid-container">
-            <div class="card active" onclick="selectFrame('#ffffff')" id="frame-white">
-                <span class="icon">⬜</span><p>Classic White</p>
+            <div class="card active" onclick="selectFrame('wedding')" id="frame-wedding">
+                <span class="icon">💍</span><p>Kasalan (Wedding)</p>
             </div>
-            <div class="card" onclick="selectFrame('#000000')" id="frame-black">
-                <span class="icon">⬛</span><p>Elegant Black</p>
+            <div class="card" onclick="selectFrame('floral')" id="frame-floral">
+                <span class="icon">🌸</span><p>Flowers (Floral)</p>
             </div>
-            <div class="card" onclick="selectFrame('#f3b700')" id="frame-gold">
-                <span class="icon">🟨</span><p>Prime Gold</p>
+            <div class="card" onclick="selectFrame('cartoon')" id="frame-cartoon">
+                <span class="icon">💥</span><p>Cartoon Style</p>
             </div>
         </div>
 
@@ -203,6 +161,8 @@
         
         <div class="video-wrapper">
             <video id="camera" playsinline autoplay></video>
+            <img id="live-frame" class="frame-overlay" src="" alt="">
+            
             <div id="countdown" class="countdown-overlay">3</div>
             <div id="flash" class="flash"></div>
         </div>
@@ -219,10 +179,9 @@
 
     <div id="result-screen" class="screen">
         <h1 class="title" style="font-size: 2rem;">SUCCESS!</h1>
-        <p>I-scan ang QR code para ma-download ang picture.</p>
+        <p id="uploadStatus">Nai-save na ang picture mo.</p>
         
-        <div id="qrcode"></div>
-        <p id="uploadStatus" style="color: var(--primary); margin-bottom: 20px;">Generating link...</p>
+        <img id="finalResultImg" src="" alt="Your Photo">
 
         <button class="btn btn-primary" onclick="showPasswordModal()">📸 TAKE ANOTHER PHOTO</button>
         <button class="btn btn-danger" onclick="endSession()">🚪 END SESSION</button>
@@ -241,9 +200,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
+        import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
-        // FIREBASE CONFIG (Same as yours)
         const firebaseConfig = {
             apiKey: "AIzaSyDrTbjnBeyNTQZU3hkaGfnXESvOKaQBIKk",
             authDomain: "photobooth-d94d3.firebaseapp.com",
@@ -252,24 +210,25 @@
             messagingSenderId: "557746814376",
             appId: "1:557746814376:web:fb4e9379767db0c39ab19d"
         };
-
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
-        // STATE VARIABLES
-        window.config = { layout: 'single', frameColor: '#ffffff' };
-        let streamActive = null;
-        let qrCodeObj = null;
+        // --- FRAME ASSETS (MGA TRANSPARENT PNG / SVG) ---
+        // Ginawa ko itong data URIs (SVG) para gumana agad kahit wala kang naka-save na images.
+        // Pwede mo itong palitan ng URL ng sarili mong transparent PNGs, ex: './frames/kasalan.png'
+        const framesData = {
+            wedding: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect x="20" y="20" width="760" height="560" fill="none" stroke="%23FFD700" stroke-width="20"/><text x="400" y="550" font-family="Arial" font-size="40" fill="%23FFD700" text-anchor="middle" font-weight="bold">Happy Wedding</text></svg>`,
+            floral: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect x="15" y="15" width="770" height="570" fill="none" stroke="%2332CD32" stroke-width="25"/><circle cx="50" cy="50" r="40" fill="%23FF69B4"/><circle cx="750" cy="50" r="40" fill="%23FF69B4"/><circle cx="50" cy="550" r="40" fill="%23FF69B4"/><circle cx="750" cy="550" r="40" fill="%23FF69B4"/></svg>`,
+            cartoon: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect x="15" y="15" width="770" height="570" fill="none" stroke="%23000" stroke-width="20" stroke-dasharray="30, 15"/><text x="400" y="80" font-family="Comic Sans MS" font-size="50" fill="%23FF4500" text-anchor="middle" font-weight="bold">BOOM!</text></svg>`
+        };
 
-        // ELEMENTS
+        window.config = { layout: 'single', frameTheme: 'wedding' };
+        let streamActive = null;
+
         const video = document.getElementById('camera');
         const canvas = document.getElementById('processCanvas');
         const ctx = canvas.getContext('2d');
-        const countdownEl = document.getElementById('countdown');
-        const flashEl = document.getElementById('flash');
-        const shotCounter = document.getElementById('shot-counter');
-        const captureBtn = document.getElementById('captureBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
+        const liveFrame = document.getElementById('live-frame');
 
         // --- UI SELECTIONS ---
         window.selectLayout = (type) => {
@@ -279,35 +238,30 @@
             document.getElementById(`layout-${type}`).classList.add('active');
         };
 
-        window.selectFrame = (color) => {
-            config.frameColor = color;
-            document.getElementById('frame-white').classList.remove('active');
-            document.getElementById('frame-black').classList.remove('active');
-            document.getElementById('frame-gold').classList.remove('active');
-            
-            if(color === '#ffffff') document.getElementById('frame-white').classList.add('active');
-            if(color === '#000000') document.getElementById('frame-black').classList.add('active');
-            if(color === '#f3b700') document.getElementById('frame-gold').classList.add('active');
+        window.selectFrame = (theme) => {
+            config.frameTheme = theme;
+            document.querySelectorAll('[id^="frame-"]').forEach(el => el.classList.remove('active'));
+            document.getElementById(`frame-${theme}`).classList.add('active');
         };
 
-        // --- NAVIGATION ---
         window.switchScreen = (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
         };
 
+        // --- CAMERA CONTROLS ---
         window.openCamera = async () => {
             switchScreen('booth-screen');
-            document.getElementById('boothStatusText').innerText = "Inihahanda ang camera...";
-            captureBtn.style.display = 'block';
-            cancelBtn.style.display = 'block';
-            shotCounter.style.display = 'none';
+            // I-set yung frame image sa live preview
+            liveFrame.src = framesData[config.frameTheme]; 
+
+            document.getElementById('captureBtn').style.display = 'block';
+            document.getElementById('cancelBtn').style.display = 'block';
+            document.getElementById('shot-counter').style.display = 'none';
 
             try {
-                // Front camera preferred for mobile
                 streamActive = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 960 } } });
                 video.srcObject = streamActive;
-                document.getElementById('boothStatusText').innerText = "Pindutin ang START SHOOT para mag-umpisa!";
             } catch (err) {
                 document.getElementById('boothStatusText').innerText = "Error: Baka walang camera o walang permission.";
             }
@@ -322,107 +276,88 @@
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
         const playCountdown = async () => {
-            countdownEl.style.opacity = '1';
-            for (let i = 3; i > 0; i--) {
-                countdownEl.innerText = i;
-                await sleep(1000);
-            }
-            countdownEl.style.opacity = '0';
-            
-            // Flash effect
-            flashEl.style.opacity = '1';
-            setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
+            const cd = document.getElementById('countdown');
+            const flash = document.getElementById('flash');
+            cd.style.opacity = '1';
+            for (let i = 3; i > 0; i--) { cd.innerText = i; await sleep(1000); }
+            cd.style.opacity = '0';
+            flash.style.opacity = '1';
+            setTimeout(() => { flash.style.opacity = '0'; }, 150);
+        };
+
+        // Load image as promise para sure na ma-draw sa canvas
+        const loadFrameImage = (src) => {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.src = src;
+            });
         };
 
         window.startCapture = async () => {
-            captureBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
+            document.getElementById('captureBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'none';
             
+            const frameImg = await loadFrameImage(framesData[config.frameTheme]);
+
             if (config.layout === 'single') {
-                // 1 SHOT LOGIC
                 canvas.width = 800; canvas.height = 600;
                 await playCountdown();
                 
-                // Draw Frame
-                ctx.fillStyle = config.frameColor;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                // Draw Video (with margin for frame)
-                ctx.drawImage(video, 20, 20, 760, 560);
+                // 1. I-draw ang video
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                // 2. I-draw ang frame overlay sa ibabaw
+                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
                 
                 await processAndUpload();
 
             } else {
-                // 3-PHOTO STRIP LOGIC
-                canvas.width = 400; canvas.height = 1200; // Vertical strip
-                ctx.fillStyle = config.frameColor;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                shotCounter.style.display = 'block';
+                canvas.width = 400; canvas.height = 1200;
+                ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                document.getElementById('shot-counter').style.display = 'block';
 
                 for (let i = 0; i < 3; i++) {
-                    shotCounter.innerText = `Shot ${i + 1} of 3`;
+                    document.getElementById('shot-counter').innerText = `Shot ${i + 1} of 3`;
                     await playCountdown();
-                    // Draw video portion. Y-offset based on index.
-                    // Frame margins: 10px sides, 10px top/bottom per photo
                     const yOffset = (i * 390) + 10; 
                     ctx.drawImage(video, 10, yOffset, 380, 380); 
-                    await sleep(1000); // 1 sec pause between shots
+                    await sleep(1000);
                 }
-                shotCounter.style.display = 'none';
+                
+                // I-draw yung frame overlay sa kabuuan ng strip
+                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+                
+                document.getElementById('shot-counter').style.display = 'none';
                 await processAndUpload();
             }
         };
 
         const processAndUpload = async () => {
             document.getElementById('boothStatusText').innerText = "Pinoproseso ang litrato...";
-            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8); // JPEG for faster upload
+            const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
             
+            // Ipakita agad sa screen yung picture
+            document.getElementById('finalResultImg').src = imageDataUrl;
             switchScreen('result-screen');
-            const uploadText = document.getElementById('uploadStatus');
-            uploadText.innerText = "Ina-upload sa server...";
+            document.getElementById('uploadStatus').innerText = "Naka-save sa Firebase (Background Process).";
 
+            // Firebase Upload (Optional: In background para mabilis sa user)
             const fileName = `photos/booth_${Date.now()}.jpg`;
             const storageRef = ref(storage, fileName);
-
-            try {
-                await uploadString(storageRef, imageDataUrl, 'data_url');
-                const downloadURL = await getDownloadURL(storageRef);
-                
-                const qrContainer = document.getElementById('qrcode');
-                qrContainer.innerHTML = "";
-                if(qrCodeObj) qrCodeObj.clear();
-                
-                qrCodeObj = new QRCode(qrContainer, {
-                    text: downloadURL, width: 200, height: 200,
-                    colorDark : "#000000", colorLight : "#ffffff"
-                });
-
-                uploadText.innerText = "Upload Complete!";
-                uploadText.style.color = "#28a745";
-            } catch (error) {
-                console.error(error);
-                uploadText.innerText = "Upload Failed. Check internet connection.";
-                uploadText.style.color = "#ff4757";
-            }
+            uploadString(storageRef, imageDataUrl, 'data_url').catch(err => console.error("Firebase error:", err));
         };
 
         // --- PASSWORD MODAL LOGIC ---
         const ACTUAL_PASSWORD = "PRIME2026";
-
         window.showPasswordModal = () => {
             document.getElementById('pass-modal').style.display = 'flex';
             document.getElementById('sessionPassword').value = '';
             document.getElementById('passError').style.display = 'none';
         };
-
-        window.closePasswordModal = () => {
-            document.getElementById('pass-modal').style.display = 'none';
-        };
-
+        window.closePasswordModal = () => document.getElementById('pass-modal').style.display = 'none';
         window.verifyPassword = () => {
-            const input = document.getElementById('sessionPassword').value;
-            if (input === ACTUAL_PASSWORD) {
-                closePasswordModal();
-                switchScreen('setup-screen'); // Balik sa setup nang hindi pinapatay buong page
+            if (document.getElementById('sessionPassword').value === ACTUAL_PASSWORD) {
+                closePasswordModal(); switchScreen('setup-screen');
             } else {
                 document.getElementById('passError').style.display = 'block';
             }
