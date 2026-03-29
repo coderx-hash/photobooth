@@ -49,24 +49,12 @@
         /* --- SCREENS --- */
         .screen {
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            width: 100%; max-width: 1400px; min-height: 100dvh;
+            width: 100%; max-width: 1600px; min-height: 100dvh;
             padding: clamp(15px, 4vw, 30px); animation: fadeIn 0.5s ease-out forwards;
         }
         .screen.active { display: flex; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- INTRO SCREEN --- */
-        .intro-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .intro-title { font-size: clamp(3.5rem, 10vw, 7rem); margin-bottom: 0; letter-spacing: 4px; }
-        .intro-subtitle { font-size: clamp(1.2rem, 3vw, 2rem); color: var(--primary); font-weight: 600; letter-spacing: 6px; margin-bottom: 50px; text-transform: uppercase; }
-        .start-btn { padding: 22px 60px; font-size: 1.2rem; font-weight: 800; border-radius: 50px; animation: pulse 2s infinite; width: auto; min-width: 250px; }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(245, 176, 0, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0); }
-        }
 
         /* --- SETUP SECTIONS --- */
         .setup-container { 
@@ -117,27 +105,35 @@
         .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 200px; }
         #camera-select { flex: 2; max-width: 300px; }
 
-        /* Dynamic video wrapper handling portrait and landscape */
+        /* Dynamic video wrapper: Default for mobile */
         .video-wrapper { 
-            position: relative; width: 100%; max-height: 800px; 
+            position: relative; width: 100%; height: 60vh; max-height: 800px; 
             border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); 
             background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s;
             display: flex; justify-content: center; align-items: center;
         }
-
-        .video-wrapper.landscape { aspect-ratio: 16/9; max-width: 1000px; height: 60vh; }
-        .video-wrapper.portrait { aspect-ratio: 9/16; max-width: 450px; height: 65vh; margin: 0 auto; }
         
+        /* Maximize on PC / Large screens */
         @media (min-width: 1024px) {
-            .video-wrapper.landscape { height: 75vh; }
+            .video-wrapper { 
+                height: 80vh; 
+                width: 95vw; 
+                max-width: none;
+                max-height: none;
+                border-radius: 16px; 
+            }
+            .camera-container {
+                max-width: 98vw; 
+            }
         }
 
         video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
         
+        /* Draggable Frame Overlay */
         .frame-overlay { 
             position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); width: 100%; height: auto; 
+            transform: translate(-50%, -50%); 
             pointer-events: auto; cursor: grab; z-index: 10; 
         }
         .frame-overlay:active { cursor: grabbing; }
@@ -158,15 +154,7 @@
 </head>
 <body>
 
-    <div id="intro-screen" class="screen active">
-        <div class="intro-wrapper">
-            <h1 class="title intro-title">PRIME DUO</h1>
-            <p class="intro-subtitle">Photobooth Pro</p>
-            <button class="btn btn-primary start-btn" onclick="switchScreen('setup-screen')">👆 Tap to Start</button>
-        </div>
-    </div>
-
-    <div id="setup-screen" class="screen">
+    <div id="setup-screen" class="screen active">
         <div class="title-container">
             <h1 class="title">PRIME DUO</h1>
             <p class="subtitle">Select your frame design</p>
@@ -193,14 +181,13 @@
             </div>
             
             <div class="live-controls" id="live-controls">
-                <button class="btn btn-secondary" onclick="toggleOrientation()">🔄 Rotate</button>
                 <select id="camera-select" class="btn btn-secondary" onchange="changeCamera()">
                     <option>Loading cameras...</option>
                 </select>
                 <button class="btn btn-secondary" onclick="toggleMirror()">🪞 Mirror</button>
             </div>
 
-            <div class="video-wrapper landscape" id="vid-wrapper">
+            <div class="video-wrapper" id="vid-wrapper">
                 <video id="camera" playsinline autoplay></video>
                 <img id="live-overlay" class="frame-overlay" src="" style="display:none;" draggable="false">
                 <div id="countdown" class="countdown-overlay">3</div>
@@ -227,7 +214,7 @@
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">LOOKS GREAT!</h1>
                 <p class="subtitle">Keep this photo or try again?</p>
             </div>
-            <div class="video-wrapper landscape" id="preview-wrapper">
+            <div class="video-wrapper" id="preview-wrapper">
                 <img id="preview-img" src="">
             </div>
             <div class="controls-row">
@@ -249,7 +236,7 @@
 
     <script>
         // State variables
-        window.config = { orientation: 'landscape', frameSrc: null };
+        window.config = { frameSrc: null };
         let streamActive = null;
         let currentPhotoDataUrl = null;
         let currentDeviceId = null;
@@ -268,10 +255,16 @@
         const boothControls = document.getElementById('booth-controls');
         const liveControls = document.getElementById('live-controls');
         const cameraSelect = document.getElementById('camera-select');
+        let overlayBaseWidth = 0;
+        let overlayBaseHeight = 0;
 
         // --- OVERLAY RESIZE SLIDER ---
         document.getElementById('overlaySize').addEventListener('input', function(e) {
-            overlayImg.style.width = e.target.value + '%';
+            const scale = e.target.value / 100;
+            if(overlayBaseWidth > 0) {
+                overlayImg.style.width = (overlayBaseWidth * scale) + 'px';
+                overlayImg.style.height = (overlayBaseHeight * scale) + 'px';
+            }
         });
 
         // --- OVERLAY DRAG LOGIC ---
@@ -353,12 +346,6 @@
         });
 
         // --- LIVE CAMERA CONTROLS ---
-        window.toggleOrientation = () => {
-            config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
-            vidWrapper.className = `video-wrapper ${config.orientation}`;
-            previewWrapper.className = `video-wrapper ${config.orientation}`;
-        };
-
         window.toggleMirror = () => {
             isMirrored = !isMirrored;
             applyMirror();
@@ -431,13 +418,35 @@
             liveControls.style.display = 'flex';
 
             if (config.frameSrc) {
-                overlayImg.src = config.frameSrc;
-                overlayImg.style.display = 'block';
-                overlayImg.style.width = '100%';
-                overlayImg.style.top = '50%';
-                overlayImg.style.left = '50%';
-                document.getElementById('overlaySize').value = 100;
-                document.getElementById('overlay-controls').style.display = 'block';
+                const img = new Image();
+                img.src = config.frameSrc;
+                img.onload = () => {
+                    overlayImg.src = config.frameSrc;
+                    
+                    // AUTO-FIT LOGIC: Check aspect ratio to perfectly fit inside the camera wrapper
+                    const wrapperAspect = vidWrapper.clientWidth / vidWrapper.clientHeight;
+                    const imgAspect = img.width / img.height;
+                    
+                    if (imgAspect > wrapperAspect) {
+                        overlayBaseWidth = vidWrapper.clientWidth;
+                        overlayBaseHeight = vidWrapper.clientWidth / imgAspect;
+                    } else {
+                        overlayBaseHeight = vidWrapper.clientHeight;
+                        overlayBaseWidth = vidWrapper.clientHeight * imgAspect;
+                    }
+
+                    overlayImg.style.width = overlayBaseWidth + 'px';
+                    overlayImg.style.height = overlayBaseHeight + 'px';
+                    overlayImg.style.display = 'block';
+                    
+                    // Reset position to dead center
+                    overlayImg.style.top = '50%';
+                    overlayImg.style.left = '50%';
+                    overlayImg.style.transform = 'translate(-50%, -50%)';
+                    
+                    document.getElementById('overlaySize').value = 100;
+                    document.getElementById('overlay-controls').style.display = 'block';
+                };
             } else {
                 overlayImg.style.display = 'none';
                 document.getElementById('overlay-controls').style.display = 'none';
@@ -467,7 +476,7 @@
             document.getElementById('overlay-controls').style.display = 'none';
             await playCountdown();
             
-            const isLandscape = config.orientation === 'landscape';
+            const isLandscape = window.innerWidth > window.innerHeight;
             if (isLandscape) { 
                 tempCanvas.width = 3840; 
                 tempCanvas.height = 2160; 
@@ -547,7 +556,7 @@
             document.getElementById('success-buttons').style.display = 'none';
 
             try {
-                // Trigger Direct Download
+                // 1. Trigger Direct Download
                 const a = document.createElement('a');
                 a.href = currentPhotoDataUrl;
                 a.download = `PrimeDuo_${Date.now()}.jpg`;
@@ -555,7 +564,7 @@
                 a.click();
                 document.body.removeChild(a);
 
-                // Save thumbnail to Local Storage (History)
+                // 2. Save thumbnail to Local Storage (History)
                 try {
                     let photos = JSON.parse(localStorage.getItem('savedPhotos') || '[]');
                     photos.push(currentPhotoDataUrl);
