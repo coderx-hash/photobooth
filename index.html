@@ -36,7 +36,7 @@
         }
 
         /* --- TYPOGRAPHY --- */
-        .title-container { text-align: center; margin-bottom: 25px; width: 100%; }
+        .title-container { text-align: center; margin-bottom: 20px; width: 100%; }
         
         .company-brand {
             color: var(--primary);
@@ -53,6 +53,7 @@
             background: linear-gradient(135deg, #ffffff 0%, var(--primary) 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             filter: drop-shadow(0px 4px 15px rgba(245, 176, 0, 0.2));
+            margin: 0;
         }
         .subtitle { font-size: clamp(0.9rem, 2.5vw, 1.1rem); color: var(--text-muted); margin-top: 5px; font-weight: 400; letter-spacing: 1px; }
 
@@ -123,11 +124,10 @@
         /* --- RESPONSIVE CAMERA AREA --- */
         .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 100%; }
         
-        .live-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; width: 100%; justify-content: center; max-width: 900px; }
+        .live-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; width: 100%; justify-content: center; max-width: 900px; }
         .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 200px; }
         #camera-select { flex: 2; max-width: 300px; }
 
-        /* Outer container prevents inner wrapper from breaking layout */
         .wrapper-container {
             width: 100%;
             display: flex;
@@ -136,7 +136,7 @@
             margin-bottom: 20px;
         }
 
-        /* Dynamic video wrapper: Auto-adjusts size without squishing */
+        /* Exactly matches Javascript logic now, no CSS overrides on width/height */
         .video-wrapper { 
             position: relative; 
             background: #000; 
@@ -144,21 +144,20 @@
             overflow: hidden; 
             border: 2px solid var(--glass-border); 
             box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
-            transition: all 0.3s ease;
-            max-width: 100%;
+            transition: width 0.3s ease, height 0.3s ease;
+            margin: 0 auto;
         }
 
         video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
         
-        /* Auto-fit Frame Overlay */
+        /* Frame Overlay locked exactly to the bounds */
         .frame-overlay { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 10; display: none; object-fit: fill; /* Lock tightly to the edges */
+            pointer-events: none; z-index: 10; display: none; object-fit: fill; 
         }
 
-        #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
-
-        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 10px; justify-content: center; }
+        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; justify-content: center; }
         .controls-row .btn { flex: 1 1 200px; }
 
         .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: clamp(6rem, 20vw, 15rem); font-weight: 900; color: white; text-shadow: 0px 10px 40px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20; }
@@ -198,9 +197,9 @@
 
     <div id="booth-screen" class="screen">
         <div class="camera-container">
-            <div class="title-container" style="margin-bottom: 10px;">
+            <div class="title-container">
                 <p class="company-brand">PRIME DUO</p>
-                <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">STRIKE A POSE</h1>
+                <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.5rem);">STRIKE A POSE</h1>
             </div>
             
             <div class="live-controls" id="live-controls">
@@ -230,9 +229,9 @@
 
     <div id="preview-screen" class="screen">
         <div class="camera-container">
-            <div class="title-container" style="margin-bottom: 10px;">
+            <div class="title-container">
                 <p class="company-brand">PRIME DUO</p>
-                <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">LOOKS GREAT!</h1>
+                <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.5rem);">LOOKS GREAT!</h1>
             </div>
             <div class="wrapper-container">
                 <div class="video-wrapper" id="preview-wrapper">
@@ -279,6 +278,49 @@
         const liveControls = document.getElementById('live-controls');
         const cameraSelect = document.getElementById('camera-select');
         const btnRotate = document.getElementById('btn-rotate');
+
+        // --- DYNAMIC PIXEL-PERFECT RESIZER ---
+        function applyExactSize(targetRatio) {
+            // Find max space taking UI elements into account
+            const isMobile = window.innerWidth < 768;
+            const padding = isMobile ? 30 : 60; 
+            const maxWidth = Math.min(window.innerWidth - padding, 1200); 
+            
+            // UI elements consume vertical space, we leave room so nothing overlaps
+            const uiSpace = isMobile ? 240 : 280; 
+            const maxHeight = window.innerHeight - uiSpace; 
+
+            let finalW = maxWidth;
+            let finalH = finalW / targetRatio;
+
+            // Constrain height if it exceeds available space, recompute width
+            if (finalH > maxHeight) {
+                finalH = maxHeight;
+                finalW = finalH * targetRatio;
+            }
+
+            // Apply exact computed pixel dimensions to kill any possible blank spaces
+            vidWrapper.style.width = `${Math.floor(finalW)}px`;
+            vidWrapper.style.height = `${Math.floor(finalH)}px`;
+            previewWrapper.style.width = `${Math.floor(finalW)}px`;
+            previewWrapper.style.height = `${Math.floor(finalH)}px`;
+        }
+
+        // Add auto-resize listener so it adjusts perfectly when browser resizes
+        window.addEventListener('resize', () => {
+            if (document.getElementById('booth-screen').classList.contains('active') || 
+                document.getElementById('preview-screen').classList.contains('active')) {
+                let ratio;
+                if (config.frameSrc) {
+                    const img = new Image();
+                    img.src = config.frameSrc;
+                    ratio = img.naturalWidth / img.naturalHeight;
+                } else {
+                    ratio = config.orientation === 'landscape' ? 16/9 : 3/4;
+                }
+                if(ratio) applyExactSize(ratio);
+            }
+        });
 
         // --- NAVIGATION & SETTINGS ---
         window.switchScreen = (screenId) => {
@@ -336,18 +378,8 @@
             
             config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
             const isLandscape = config.orientation === 'landscape';
-            
-            // USE 3:4 FOR PORTRAIT SO IT IS WIDER AND LARGER ON SCREEN
             const ratio = isLandscape ? 16/9 : 3/4; 
-            
-            vidWrapper.style.aspectRatio = `${ratio}`;
-            previewWrapper.style.aspectRatio = `${ratio}`;
-            
-            vidWrapper.style.width = isLandscape ? "100%" : "auto";
-            vidWrapper.style.height = isLandscape ? "auto" : "80vh"; 
-            
-            previewWrapper.style.width = isLandscape ? "100%" : "auto";
-            previewWrapper.style.height = isLandscape ? "auto" : "80vh";
+            applyExactSize(ratio);
         };
 
         async function getCameras() {
@@ -416,46 +448,21 @@
                 img.onload = () => {
                     overlayImg.src = config.frameSrc;
                     
-                    // WYSIWYG: PREVENT STRETCHING BY SETTING EXACT BOX SIZES
                     const ratio = img.naturalWidth / img.naturalHeight;
-                    vidWrapper.style.aspectRatio = `${ratio}`;
-                    previewWrapper.style.aspectRatio = `${ratio}`;
-                    
-                    if (ratio >= 1) {
-                        // Landscape PNG (Wider or Square)
-                        vidWrapper.style.width = "100%";
-                        vidWrapper.style.height = "auto";
-                        previewWrapper.style.width = "100%";
-                        previewWrapper.style.height = "auto";
-                    } else {
-                        // Portrait PNG (Taller)
-                        vidWrapper.style.width = "auto";
-                        vidWrapper.style.height = "80vh"; 
-                        previewWrapper.style.width = "auto";
-                        previewWrapper.style.height = "80vh";
-                    }
+                    applyExactSize(ratio); // PERFECT WYSIWYG FIT
                     
                     overlayImg.style.display = 'block';
                 };
             } else {
                 overlayImg.style.display = 'none';
-                btnRotate.style.display = 'inline-block'; // Show rotate button for No Frame
+                btnRotate.style.display = 'inline-block'; // Show rotate button
                 
-                // NO FRAME: Apply current default orientation
+                // NO FRAME: Apply exact size calculation
                 config.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
                 const isLandscape = config.orientation === 'landscape';
-                
-                // USE 3:4 FOR WIDER PORTRAIT INSTEAD OF 9:16
                 const ratio = isLandscape ? 16/9 : 3/4;
                 
-                vidWrapper.style.aspectRatio = `${ratio}`;
-                previewWrapper.style.aspectRatio = `${ratio}`;
-                
-                vidWrapper.style.width = isLandscape ? "100%" : "auto";
-                vidWrapper.style.height = isLandscape ? "auto" : "80vh"; 
-                
-                previewWrapper.style.width = isLandscape ? "100%" : "auto";
-                previewWrapper.style.height = isLandscape ? "auto" : "80vh";
+                applyExactSize(ratio);
             }
 
             await startVideoStream();
@@ -491,7 +498,7 @@
                 canvasW = img.naturalWidth;
                 canvasH = img.naturalHeight;
             } else {
-                // No frame: 4K Standard based on current toggle state
+                // No frame: 4K Standard
                 const isLandscape = config.orientation === 'landscape';
                 canvasW = isLandscape ? 3840 : 2160;
                 canvasH = isLandscape ? 2160 : 2880; 
