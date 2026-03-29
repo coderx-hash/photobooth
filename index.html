@@ -49,24 +49,12 @@
         /* --- SCREENS --- */
         .screen {
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            width: 100%; max-width: 1200px; min-height: 100dvh;
+            width: 100%; max-width: 1400px; min-height: 100dvh;
             padding: clamp(15px, 4vw, 30px); animation: fadeIn 0.5s ease-out forwards;
         }
         .screen.active { display: flex; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- INTRO SCREEN --- */
-        .intro-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .intro-title { font-size: clamp(3.5rem, 10vw, 7rem); margin-bottom: 0; letter-spacing: 4px; }
-        .intro-subtitle { font-size: clamp(1.2rem, 3vw, 2rem); color: var(--primary); font-weight: 600; letter-spacing: 6px; margin-bottom: 50px; text-transform: uppercase; }
-        .start-btn { padding: 22px 60px; font-size: 1.2rem; font-weight: 800; border-radius: 50px; animation: pulse 2s infinite; width: auto; min-width: 250px; }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(245, 176, 0, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0); }
-        }
 
         /* --- SETUP SECTIONS --- */
         .setup-container { 
@@ -100,7 +88,6 @@
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
         .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5); transform: translateY(-3px); border-color: var(--danger);}
 
-        /* Styling for select dropdown */
         select.btn {
             appearance: none;
             -webkit-appearance: none;
@@ -109,48 +96,43 @@
             outline: none;
             cursor: pointer;
         }
-        select.btn option {
-            background: var(--bg-dark);
-            color: var(--text-main);
-        }
+        select.btn option { background: var(--bg-dark); color: var(--text-main); }
 
-        /* --- CAMERA AREA --- */
-        .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; }
+        /* --- RESPONSIVE CAMERA AREA --- */
+        .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 100%; }
         
-        .live-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; width: 100%; justify-content: center; }
+        .live-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; width: 100%; justify-content: center; max-width: 900px; }
         .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 200px; }
         #camera-select { flex: 2; max-width: 300px; }
 
-        .video-wrapper { position: relative; width: 100%; max-width: 850px; border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s; max-height: 65vh; }
+        /* Dynamic video wrapper for big screens */
+        .video-wrapper { 
+            position: relative; width: 100%; height: 60vh; max-height: 800px; 
+            border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); 
+            background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s;
+            display: flex; justify-content: center; align-items: center;
+        }
         
-        .video-wrapper.landscape { aspect-ratio: 4/3; }
-        .video-wrapper.portrait { aspect-ratio: 3/4; max-width: 450px; margin: 0 auto; } 
+        @media (min-width: 1024px) {
+            .video-wrapper { height: 75vh; width: 90vw; }
+        }
 
         video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
         
-        /* MOVABLE & RESIZABLE OVERLAY CSS */
         .frame-overlay { 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            width: 100%; 
-            height: auto; 
-            pointer-events: auto; 
-            cursor: grab; 
-            z-index: 10; 
+            position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); width: 100%; height: auto; 
+            pointer-events: auto; cursor: grab; z-index: 10; 
         }
         .frame-overlay:active { cursor: grabbing; }
 
-        /* OVERLAY SIZE SLIDER CONTAINER */
         #overlay-controls {
             width: 100%; max-width: 650px; margin-top: 15px; 
             background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); 
             padding: 15px; border-radius: 16px; text-align: center;
         }
 
-        /* Controls */
         .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 20px; justify-content: center; }
         .controls-row .btn { flex: 1 1 200px; }
 
@@ -161,15 +143,7 @@
 </head>
 <body>
 
-    <div id="intro-screen" class="screen active">
-        <div class="intro-wrapper">
-            <h1 class="title intro-title">PRIME DUO</h1>
-            <p class="intro-subtitle">Photobooth Pro</p>
-            <button class="btn btn-primary start-btn" onclick="switchScreen('setup-screen')">👆 Tap to Start</button>
-        </div>
-    </div>
-
-    <div id="setup-screen" class="screen">
+    <div id="setup-screen" class="screen active">
         <div class="title-container">
             <h1 class="title">PRIME DUO</h1>
             <p class="subtitle">Select your frame design</p>
@@ -196,14 +170,13 @@
             </div>
             
             <div class="live-controls" id="live-controls">
-                <button class="btn btn-secondary" onclick="toggleOrientation()">🔄 Rotate</button>
                 <select id="camera-select" class="btn btn-secondary" onchange="changeCamera()">
                     <option>Loading cameras...</option>
                 </select>
                 <button class="btn btn-secondary" onclick="toggleMirror()">🪞 Mirror</button>
             </div>
 
-            <div class="video-wrapper landscape" id="vid-wrapper">
+            <div class="video-wrapper" id="vid-wrapper">
                 <video id="camera" playsinline autoplay></video>
                 <img id="live-overlay" class="frame-overlay" src="" style="display:none;" draggable="false">
                 <div id="countdown" class="countdown-overlay">3</div>
@@ -230,48 +203,33 @@
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">LOOKS GREAT!</h1>
                 <p class="subtitle">Keep this photo or try again?</p>
             </div>
-            <div class="video-wrapper landscape" id="preview-wrapper">
+            <div class="video-wrapper" id="preview-wrapper">
                 <img id="preview-img" src="">
             </div>
             <div class="controls-row">
                 <button class="btn btn-danger" onclick="retakePhoto()">🗑️ Retake</button>
-                <button class="btn btn-primary" onclick="savePhoto()">💾 Save & Upload</button>
+                <button class="btn btn-primary" onclick="savePhoto()">💾 Save to Device</button>
             </div>
         </div>
     </div>
 
     <div id="result-screen" class="screen">
         <div class="title-container" style="margin-bottom: 40px;">
-            <h1 class="title" id="resultTitle" style="font-size: clamp(2.5rem, 6vw, 4.5rem);">UPLOADING</h1>
-            <p id="uploadStatus" class="subtitle" style="font-size: clamp(1rem, 3vw, 1.3rem);">Saving securely to the cloud...</p>
+            <h1 class="title" id="resultTitle" style="font-size: clamp(2.5rem, 6vw, 4.5rem);">SAVING</h1>
+            <p id="uploadStatus" class="subtitle" style="font-size: clamp(1rem, 3vw, 1.3rem);">Saving securely to your device...</p>
         </div>
         <div id="success-buttons" class="controls-row" style="display:none; justify-content: center;">
             <button class="btn btn-primary" onclick="startNewSession()" style="max-width: 350px;">✨ New Session</button>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getStorage, ref, uploadString } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
-
-        // FIREBASE CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyDrTbjnBeyNTQZU3hkaGfnXESvOKaQBIKk",
-            authDomain: "photobooth-d94d3.firebaseapp.com",
-            projectId: "photobooth-d94d3",
-            storageBucket: "photobooth-d94d3.firebasestorage.app",
-            messagingSenderId: "557746814376",
-            appId: "1:557746814376:web:fb4e9379767db0c39ab19d"
-        };
-        const app = initializeApp(firebaseConfig);
-        const storage = getStorage(app);
-
+    <script>
         // State variables
-        window.config = { orientation: 'landscape', frameSrc: null };
+        window.config = { frameSrc: null };
         let streamActive = null;
         let currentPhotoDataUrl = null;
         let currentDeviceId = null;
-        let isMirrored = false; // Default: hindi naka-mirror (best for DSLR)
+        let isMirrored = false; 
 
         // Elements
         const video = document.getElementById('camera');
@@ -302,8 +260,8 @@
                 else { startX = e.clientX; startY = e.clientY; }
 
                 const style = window.getComputedStyle(el);
-                initialLeft = parseFloat(style.left);
-                initialTop = parseFloat(style.top);
+                initialLeft = parseFloat(style.left) || 0;
+                initialTop = parseFloat(style.top) || 0;
                 el.style.cursor = 'grabbing';
             };
 
@@ -371,12 +329,6 @@
         });
 
         // --- LIVE CAMERA CONTROLS ---
-        window.toggleOrientation = () => {
-            config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
-            vidWrapper.className = `video-wrapper ${config.orientation}`;
-            previewWrapper.className = `video-wrapper ${config.orientation}`;
-        };
-
         window.toggleMirror = () => {
             isMirrored = !isMirrored;
             applyMirror();
@@ -418,18 +370,13 @@
         async function startVideoStream(deviceId = null) {
             if (streamActive) streamActive.getTracks().forEach(track => track.stop());
             
-            // Request 4K target to make sure we get the highest res your DSLR/Webcam offers
             const constraints = { 
-                video: { 
-                    width: { ideal: 3840 }, 
-                    height: { ideal: 2160 } 
-                } 
+                video: { width: { ideal: 3840 }, height: { ideal: 2160 } } 
             };
 
             if (deviceId) {
                 constraints.video.deviceId = { exact: deviceId };
             } else {
-                // Default fallback if no device specified
                 constraints.video.facingMode = "environment"; 
             }
 
@@ -437,14 +384,11 @@
                 streamActive = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = streamActive;
 
-                // Update the current device ID based on what the browser actually used
                 const track = streamActive.getVideoTracks()[0];
                 currentDeviceId = track.getSettings().deviceId;
 
-                // Update the dropdown list now that we have permissions
                 await getCameras();
                 applyMirror();
-
             } catch (err) { 
                 alert("Camera access denied or unavailable. Please check browser permissions."); 
                 console.error(err);
@@ -493,12 +437,14 @@
             document.getElementById('overlay-controls').style.display = 'none';
             await playCountdown();
             
-            if (config.orientation === 'landscape') { 
-                tempCanvas.width = 2400; 
-                tempCanvas.height = 1800; 
+            // Adjust snapshot resolution based on actual window size/orientation
+            const isLandscape = window.innerWidth > window.innerHeight;
+            if (isLandscape) { 
+                tempCanvas.width = 3840; 
+                tempCanvas.height = 2160; 
             } else { 
-                tempCanvas.width = 1800; 
-                tempCanvas.height = 2400; 
+                tempCanvas.width = 2160; 
+                tempCanvas.height = 3840; 
             }
             
             const canvasW = tempCanvas.width;
@@ -513,13 +459,10 @@
             const startY = (canvasH - drawH) / 2;
 
             tempCtx.save();
-            
-            // Check if user manually mirrored the camera, and reflect it on canvas
             if (isMirrored) {
                 tempCtx.translate(canvasW, 0);
                 tempCtx.scale(-1, 1);
             }
-            
             tempCtx.drawImage(video, startX, startY, drawW, drawH);
             tempCtx.restore();
 
@@ -562,33 +505,52 @@
             if(config.frameSrc) document.getElementById('overlay-controls').style.display = 'block';
         };
 
-        window.savePhoto = async () => {
+        // --- LOCAL STORAGE & DOWNLOAD ---
+        window.savePhoto = () => {
             switchScreen('result-screen');
             const titleEl = document.getElementById('resultTitle');
             const statusEl = document.getElementById('uploadStatus');
             
-            titleEl.innerText = "UPLOADING";
+            titleEl.innerText = "SAVING";
             titleEl.style.background = "linear-gradient(135deg, #ffffff 0%, var(--primary) 100%)";
             titleEl.style.webkitBackgroundClip = "text";
-            statusEl.innerText = "Saving securely to the cloud...";
+            statusEl.innerText = "Downloading photo to your device...";
             document.getElementById('success-buttons').style.display = 'none';
 
-            const fileName = `photos/prime_${Date.now()}.jpg`;
-            const storageRef = ref(storage, fileName);
-
             try {
-                await uploadString(storageRef, currentPhotoDataUrl, 'data_url');
-                titleEl.innerText = "SUCCESS!";
-                titleEl.style.background = "linear-gradient(135deg, #4ade80 0%, #16a34a 100%)";
-                titleEl.style.webkitBackgroundClip = "text";
-                statusEl.innerText = "Photo saved successfully!";
-                document.getElementById('success-buttons').style.display = 'flex';
+                // 1. Trigger Direct Download
+                const a = document.createElement('a');
+                a.href = currentPhotoDataUrl;
+                a.download = `PrimeDuo_${Date.now()}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                // 2. Save thumbnail to Local Storage (History)
+                try {
+                    let photos = JSON.parse(localStorage.getItem('savedPhotos') || '[]');
+                    // Downscale the image a bit so it doesn't break the 5MB local storage limit quickly
+                    photos.push(currentPhotoDataUrl);
+                    if(photos.length > 10) photos.shift(); // Keep only latest 10
+                    localStorage.setItem('savedPhotos', JSON.stringify(photos));
+                } catch(e) {
+                    console.warn("Local storage full, skipped history update.");
+                }
+
+                setTimeout(() => {
+                    titleEl.innerText = "SUCCESS!";
+                    titleEl.style.background = "linear-gradient(135deg, #4ade80 0%, #16a34a 100%)";
+                    titleEl.style.webkitBackgroundClip = "text";
+                    statusEl.innerText = "Photo saved successfully to your device!";
+                    document.getElementById('success-buttons').style.display = 'flex';
+                }, 800);
+
             } catch (error) {
                 console.error(error);
                 titleEl.innerText = "ERROR";
                 titleEl.style.background = "linear-gradient(135deg, #f87171 0%, #dc2626 100%)";
                 titleEl.style.webkitBackgroundClip = "text";
-                statusEl.innerText = "Upload failed. Please check your internet connection.";
+                statusEl.innerText = "Failed to save photo.";
                 document.getElementById('success-buttons').style.display = 'flex';
             }
         };
