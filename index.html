@@ -37,6 +37,16 @@
 
         /* --- TYPOGRAPHY --- */
         .title-container { text-align: center; margin-bottom: 25px; width: 100%; }
+        
+        .company-brand {
+            color: var(--primary);
+            font-weight: 800;
+            letter-spacing: 5px;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            margin-bottom: -5px;
+            text-transform: uppercase;
+        }
+
         h1.title {
             font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; line-height: 1.1;
             text-transform: uppercase; letter-spacing: 2px;
@@ -136,6 +146,12 @@
             box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
             transition: all 0.3s ease;
         }
+        
+        @media (min-width: 1024px) {
+            .video-wrapper { 
+                max-height: 85vh; /* Gives room for the larger 80vh portrait height */
+            }
+        }
 
         video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
         #preview-img { width: 100%; height: 100%; object-fit: cover; background: #050505; }
@@ -187,6 +203,7 @@
     <div id="booth-screen" class="screen">
         <div class="camera-container">
             <div class="title-container" style="margin-bottom: 10px;">
+                <p class="company-brand">PRIME DUO</p>
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">STRIKE A POSE</h1>
             </div>
             
@@ -217,9 +234,9 @@
 
     <div id="preview-screen" class="screen">
         <div class="camera-container">
-            <div class="title-container">
+            <div class="title-container" style="margin-bottom: 10px;">
+                <p class="company-brand">PRIME DUO</p>
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">LOOKS GREAT!</h1>
-                <p class="subtitle">Keep this photo or try again?</p>
             </div>
             <div class="wrapper-container">
                 <div class="video-wrapper" id="preview-wrapper">
@@ -235,6 +252,7 @@
 
     <div id="result-screen" class="screen">
         <div class="title-container" style="margin-bottom: 40px;">
+            <p class="company-brand">PRIME DUO</p>
             <h1 class="title" id="resultTitle" style="font-size: clamp(2.5rem, 6vw, 4.5rem);">SAVING</h1>
             <p id="uploadStatus" class="subtitle" style="font-size: clamp(1rem, 3vw, 1.3rem);">Saving securely to your device...</p>
         </div>
@@ -322,16 +340,18 @@
             
             config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
             const isLandscape = config.orientation === 'landscape';
-            const ratio = isLandscape ? 16/9 : 9/16;
+            
+            // USE 3:4 FOR PORTRAIT SO IT IS WIDER AND LARGER ON SCREEN
+            const ratio = isLandscape ? 16/9 : 3/4; 
             
             vidWrapper.style.aspectRatio = `${ratio}`;
             previewWrapper.style.aspectRatio = `${ratio}`;
             
             vidWrapper.style.width = isLandscape ? "100%" : "auto";
-            vidWrapper.style.height = isLandscape ? "auto" : "65vh";
+            vidWrapper.style.height = isLandscape ? "auto" : "80vh"; // Height increased for better desktop size
             
             previewWrapper.style.width = isLandscape ? "100%" : "auto";
-            previewWrapper.style.height = isLandscape ? "auto" : "65vh";
+            previewWrapper.style.height = isLandscape ? "auto" : "80vh";
         };
 
         async function getCameras() {
@@ -414,9 +434,9 @@
                     } else {
                         // Portrait PNG (Taller) - Maximize height safely
                         vidWrapper.style.width = "auto";
-                        vidWrapper.style.height = "65vh"; 
+                        vidWrapper.style.height = "75vh"; 
                         previewWrapper.style.width = "auto";
-                        previewWrapper.style.height = "65vh";
+                        previewWrapper.style.height = "75vh";
                     }
                     
                     overlayImg.style.display = 'block';
@@ -428,16 +448,18 @@
                 // NO FRAME: Apply current default orientation
                 config.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
                 const isLandscape = config.orientation === 'landscape';
-                const ratio = isLandscape ? 16/9 : 9/16;
+                
+                // USE 3:4 FOR WIDER PORTRAIT INSTEAD OF 9:16
+                const ratio = isLandscape ? 16/9 : 3/4;
                 
                 vidWrapper.style.aspectRatio = `${ratio}`;
                 previewWrapper.style.aspectRatio = `${ratio}`;
                 
                 vidWrapper.style.width = isLandscape ? "100%" : "auto";
-                vidWrapper.style.height = isLandscape ? "auto" : "65vh";
+                vidWrapper.style.height = isLandscape ? "auto" : "80vh"; // Increased height
                 
                 previewWrapper.style.width = isLandscape ? "100%" : "auto";
-                previewWrapper.style.height = isLandscape ? "auto" : "65vh";
+                previewWrapper.style.height = isLandscape ? "auto" : "80vh";
             }
 
             await startVideoStream();
@@ -476,7 +498,8 @@
                 // No frame: 4K Standard based on current toggle state
                 const isLandscape = config.orientation === 'landscape';
                 canvasW = isLandscape ? 3840 : 2160;
-                canvasH = isLandscape ? 2160 : 3840;
+                // Output perfectly matching the 3:4 or 16:9 ratio
+                canvasH = isLandscape ? 2160 : 2880; 
             }
             
             tempCanvas.width = canvasW;
