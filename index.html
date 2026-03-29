@@ -56,6 +56,18 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- INTRO SCREEN --- */
+        .intro-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .intro-title { font-size: clamp(3.5rem, 10vw, 7rem); margin-bottom: 0; letter-spacing: 4px; }
+        .intro-subtitle { font-size: clamp(1.2rem, 3vw, 2rem); color: var(--primary); font-weight: 600; letter-spacing: 6px; margin-bottom: 50px; text-transform: uppercase; }
+        .start-btn { padding: 22px 60px; font-size: 1.2rem; font-weight: 800; border-radius: 50px; animation: pulse 2s infinite; width: auto; min-width: 250px; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(245, 176, 0, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(245, 176, 0, 0); }
+        }
+
         /* --- SETUP SECTIONS --- */
         .setup-container { 
             width: 100%; max-width: 650px; background: var(--glass-bg); 
@@ -105,46 +117,36 @@
         .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 200px; }
         #camera-select { flex: 2; max-width: 300px; }
 
-        /* Dynamic video wrapper: Default for mobile */
-        .video-wrapper { 
-            position: relative; width: 100%; height: 60vh; max-height: 800px; 
-            border-radius: 24px; overflow: hidden; border: 2px solid var(--glass-border); 
-            background: #000; box-shadow: 0 30px 60px rgba(0,0,0,0.8); transition: all 0.4s;
-            display: flex; justify-content: center; align-items: center;
+        /* Outer container prevents inner wrapper from breaking layout */
+        .wrapper-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
         }
-        
-        /* Maximize on PC / Large screens */
-        @media (min-width: 1024px) {
-            .video-wrapper { 
-                height: 80vh; 
-                width: 95vw; 
-                max-width: none;
-                max-height: none;
-                border-radius: 16px; 
-            }
-            .camera-container {
-                max-width: 98vw; 
-            }
+
+        /* Dynamic video wrapper: Auto-adjusts size without squishing */
+        .video-wrapper { 
+            position: relative; 
+            background: #000; 
+            border-radius: 16px; 
+            overflow: hidden; 
+            border: 2px solid var(--glass-border); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
+            transition: all 0.3s ease;
         }
 
         video { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        #preview-img { width: 100%; height: 100%; object-fit: contain; background: #050505; }
+        #preview-img { width: 100%; height: 100%; object-fit: cover; background: #050505; }
         
-        /* Draggable Frame Overlay */
+        /* Auto-fit Frame Overlay */
         .frame-overlay { 
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); 
-            pointer-events: auto; cursor: grab; z-index: 10; 
-        }
-        .frame-overlay:active { cursor: grabbing; }
-
-        #overlay-controls {
-            width: 100%; max-width: 650px; margin-top: 15px; 
-            background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); 
-            padding: 15px; border-radius: 16px; text-align: center;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10; object-fit: contain;
         }
 
-        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 20px; justify-content: center; }
+        .controls-row { display: flex; flex-direction: row; flex-wrap: wrap; gap: 15px; width: 100%; max-width: 650px; margin-top: 10px; justify-content: center; }
         .controls-row .btn { flex: 1 1 200px; }
 
         .countdown-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: clamp(6rem, 20vw, 15rem); font-weight: 900; color: white; text-shadow: 0px 10px 40px rgba(0,0,0,0.8); background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 20; }
@@ -154,7 +156,15 @@
 </head>
 <body>
 
-    <div id="setup-screen" class="screen active">
+    <div id="intro-screen" class="screen active">
+        <div class="intro-wrapper">
+            <h1 class="title intro-title">PRIME DUO</h1>
+            <p class="intro-subtitle">Photobooth Pro</p>
+            <button class="btn btn-primary start-btn" onclick="switchScreen('setup-screen')">👆 Tap to Start</button>
+        </div>
+    </div>
+
+    <div id="setup-screen" class="screen">
         <div class="title-container">
             <h1 class="title">PRIME DUO</h1>
             <p class="subtitle">Select your frame design</p>
@@ -181,23 +191,20 @@
             </div>
             
             <div class="live-controls" id="live-controls">
+                <button id="btn-rotate" class="btn btn-secondary" onclick="toggleOrientation()">🔄 Rotate</button>
                 <select id="camera-select" class="btn btn-secondary" onchange="changeCamera()">
                     <option>Loading cameras...</option>
                 </select>
                 <button class="btn btn-secondary" onclick="toggleMirror()">🪞 Mirror</button>
             </div>
 
-            <div class="video-wrapper" id="vid-wrapper">
-                <video id="camera" playsinline autoplay></video>
-                <img id="live-overlay" class="frame-overlay" src="" style="display:none;" draggable="false">
-                <div id="countdown" class="countdown-overlay">3</div>
-                <div id="flash" class="flash"></div>
-            </div>
-
-            <div id="overlay-controls" style="display:none;">
-                <p style="margin-bottom: 10px; font-size: 0.95rem; font-weight: 600; color: var(--text-main);">🖼️ Resize your PNG</p>
-                <input type="range" id="overlaySize" min="10" max="200" value="100" style="width: 80%; cursor: pointer;">
-                <p style="margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">Drag the image above to move it around</p>
+            <div class="wrapper-container">
+                <div class="video-wrapper" id="vid-wrapper">
+                    <video id="camera" playsinline autoplay></video>
+                    <img id="live-overlay" class="frame-overlay" src="" style="display:none;" draggable="false">
+                    <div id="countdown" class="countdown-overlay">3</div>
+                    <div id="flash" class="flash"></div>
+                </div>
             </div>
 
             <div class="controls-row" id="booth-controls">
@@ -214,8 +221,10 @@
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">LOOKS GREAT!</h1>
                 <p class="subtitle">Keep this photo or try again?</p>
             </div>
-            <div class="video-wrapper" id="preview-wrapper">
-                <img id="preview-img" src="">
+            <div class="wrapper-container">
+                <div class="video-wrapper" id="preview-wrapper">
+                    <img id="preview-img" src="">
+                </div>
             </div>
             <div class="controls-row">
                 <button class="btn btn-danger" onclick="retakePhoto()">🗑️ Retake</button>
@@ -236,7 +245,7 @@
 
     <script>
         // State variables
-        window.config = { frameSrc: null };
+        window.config = { frameSrc: null, orientation: 'landscape' };
         let streamActive = null;
         let currentPhotoDataUrl = null;
         let currentDeviceId = null;
@@ -255,58 +264,7 @@
         const boothControls = document.getElementById('booth-controls');
         const liveControls = document.getElementById('live-controls');
         const cameraSelect = document.getElementById('camera-select');
-        let overlayBaseWidth = 0;
-        let overlayBaseHeight = 0;
-
-        // --- OVERLAY RESIZE SLIDER ---
-        document.getElementById('overlaySize').addEventListener('input', function(e) {
-            const scale = e.target.value / 100;
-            if(overlayBaseWidth > 0) {
-                overlayImg.style.width = (overlayBaseWidth * scale) + 'px';
-                overlayImg.style.height = (overlayBaseHeight * scale) + 'px';
-            }
-        });
-
-        // --- OVERLAY DRAG LOGIC ---
-        function makeOverlayDraggable(el) {
-            let isDragging = false, startX, startY, initialLeft, initialTop;
-
-            const dragStart = (e) => {
-                isDragging = true;
-                if (e.type === "touchstart") { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }
-                else { startX = e.clientX; startY = e.clientY; }
-
-                const style = window.getComputedStyle(el);
-                initialLeft = parseFloat(style.left) || 0;
-                initialTop = parseFloat(style.top) || 0;
-                el.style.cursor = 'grabbing';
-            };
-
-            const dragMove = (e) => {
-                if (!isDragging) return;
-                e.preventDefault(); 
-                let currentX, currentY;
-                if (e.type === "touchmove") { currentX = e.touches[0].clientX; currentY = e.touches[0].clientY; }
-                else { currentX = e.clientX; currentY = e.clientY; }
-
-                let dx = currentX - startX;
-                let dy = currentY - startY;
-
-                el.style.left = `${initialLeft + dx}px`;
-                el.style.top = `${initialTop + dy}px`;
-            };
-
-            const dragEnd = () => { isDragging = false; el.style.cursor = 'grab'; };
-
-            el.addEventListener('mousedown', dragStart);
-            el.addEventListener('touchstart', dragStart, {passive: false});
-            document.addEventListener('mousemove', dragMove);
-            document.addEventListener('touchmove', dragMove, {passive: false});
-            document.addEventListener('mouseup', dragEnd);
-            document.addEventListener('touchend', dragEnd);
-        }
-        
-        makeOverlayDraggable(overlayImg);
+        const btnRotate = document.getElementById('btn-rotate');
 
         // --- NAVIGATION & SETTINGS ---
         window.switchScreen = (screenId) => {
@@ -358,6 +316,23 @@
                 video.style.transform = "scaleX(1)";
             }
         }
+
+        window.toggleOrientation = () => {
+            if (config.frameSrc) return; // Prevent rotation if frame dictates aspect ratio
+            
+            config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
+            const isLandscape = config.orientation === 'landscape';
+            const ratio = isLandscape ? 16/9 : 9/16;
+            
+            vidWrapper.style.aspectRatio = `${ratio}`;
+            previewWrapper.style.aspectRatio = `${ratio}`;
+            
+            vidWrapper.style.width = isLandscape ? "100%" : "auto";
+            vidWrapper.style.height = isLandscape ? "auto" : "65vh";
+            
+            previewWrapper.style.width = isLandscape ? "100%" : "auto";
+            previewWrapper.style.height = isLandscape ? "auto" : "65vh";
+        };
 
         async function getCameras() {
             const devices = await navigator.mediaDevices.enumerateDevices();
@@ -418,38 +393,51 @@
             liveControls.style.display = 'flex';
 
             if (config.frameSrc) {
+                btnRotate.style.display = 'none'; // Hide rotate when PNG dictates size
+                
                 const img = new Image();
                 img.src = config.frameSrc;
                 img.onload = () => {
                     overlayImg.src = config.frameSrc;
                     
-                    // AUTO-FIT LOGIC: Check aspect ratio to perfectly fit inside the camera wrapper
-                    const wrapperAspect = vidWrapper.clientWidth / vidWrapper.clientHeight;
-                    const imgAspect = img.width / img.height;
+                    // WYSIWYG: PREVENT STRETCHING BY SETTING EXACT BOX SIZES
+                    const ratio = img.naturalWidth / img.naturalHeight;
+                    vidWrapper.style.aspectRatio = `${ratio}`;
+                    previewWrapper.style.aspectRatio = `${ratio}`;
                     
-                    if (imgAspect > wrapperAspect) {
-                        overlayBaseWidth = vidWrapper.clientWidth;
-                        overlayBaseHeight = vidWrapper.clientWidth / imgAspect;
+                    if (ratio > 1) {
+                        // Landscape PNG (Wider)
+                        vidWrapper.style.width = "100%";
+                        vidWrapper.style.height = "auto";
+                        previewWrapper.style.width = "100%";
+                        previewWrapper.style.height = "auto";
                     } else {
-                        overlayBaseHeight = vidWrapper.clientHeight;
-                        overlayBaseWidth = vidWrapper.clientHeight * imgAspect;
+                        // Portrait PNG (Taller) - Maximize height safely
+                        vidWrapper.style.width = "auto";
+                        vidWrapper.style.height = "65vh"; 
+                        previewWrapper.style.width = "auto";
+                        previewWrapper.style.height = "65vh";
                     }
-
-                    overlayImg.style.width = overlayBaseWidth + 'px';
-                    overlayImg.style.height = overlayBaseHeight + 'px';
+                    
                     overlayImg.style.display = 'block';
-                    
-                    // Reset position to dead center
-                    overlayImg.style.top = '50%';
-                    overlayImg.style.left = '50%';
-                    overlayImg.style.transform = 'translate(-50%, -50%)';
-                    
-                    document.getElementById('overlaySize').value = 100;
-                    document.getElementById('overlay-controls').style.display = 'block';
                 };
             } else {
                 overlayImg.style.display = 'none';
-                document.getElementById('overlay-controls').style.display = 'none';
+                btnRotate.style.display = 'inline-block'; // Show rotate button for No Frame
+                
+                // NO FRAME: Apply current default orientation
+                config.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+                const isLandscape = config.orientation === 'landscape';
+                const ratio = isLandscape ? 16/9 : 9/16;
+                
+                vidWrapper.style.aspectRatio = `${ratio}`;
+                previewWrapper.style.aspectRatio = `${ratio}`;
+                
+                vidWrapper.style.width = isLandscape ? "100%" : "auto";
+                vidWrapper.style.height = isLandscape ? "auto" : "65vh";
+                
+                previewWrapper.style.width = isLandscape ? "100%" : "auto";
+                previewWrapper.style.height = isLandscape ? "auto" : "65vh";
             }
 
             await startVideoStream();
@@ -469,27 +457,35 @@
             setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
-        // --- SNAP & EXACT RENDER (HIGH RESOLUTION) ---
+        // --- SNAP & EXACT RENDER (WYSIWYG) ---
         window.startCapture = async () => {
             boothControls.style.display = 'none';
             liveControls.style.display = 'none';
-            document.getElementById('overlay-controls').style.display = 'none';
             await playCountdown();
             
-            const isLandscape = window.innerWidth > window.innerHeight;
-            if (isLandscape) { 
-                tempCanvas.width = 3840; 
-                tempCanvas.height = 2160; 
-            } else { 
-                tempCanvas.width = 2160; 
-                tempCanvas.height = 3840; 
+            let canvasW, canvasH;
+
+            if (config.frameSrc) {
+                // Photo strictly follows the PNG resolution
+                const img = new Image();
+                img.src = config.frameSrc;
+                await new Promise(r => { img.onload = r; });
+                canvasW = img.naturalWidth;
+                canvasH = img.naturalHeight;
+            } else {
+                // No frame: 4K Standard based on current toggle state
+                const isLandscape = config.orientation === 'landscape';
+                canvasW = isLandscape ? 3840 : 2160;
+                canvasH = isLandscape ? 2160 : 3840;
             }
             
-            const canvasW = tempCanvas.width;
-            const canvasH = tempCanvas.height;
+            tempCanvas.width = canvasW;
+            tempCanvas.height = canvasH;
+            
             const videoW = video.videoWidth;
             const videoH = video.videoHeight;
             
+            // EXACT MATHEMATICAL MATCH TO CSS 'object-fit: cover'
             const scale = Math.max(canvasW / videoW, canvasH / videoH);
             const drawW = videoW * scale;
             const drawH = videoH * scale;
@@ -501,6 +497,7 @@
                 tempCtx.translate(canvasW, 0);
                 tempCtx.scale(-1, 1);
             }
+            // Draw perfectly centered without stretching
             tempCtx.drawImage(video, startX, startY, drawW, drawH);
             tempCtx.restore();
 
@@ -508,25 +505,7 @@
                 const img = new Image();
                 img.src = config.frameSrc;
                 await new Promise(r => { img.onload = r; });
-
-                const wrapperRect = vidWrapper.getBoundingClientRect();
-                const elRect = overlayImg.getBoundingClientRect();
-
-                const scaleX = canvasW / wrapperRect.width;
-                const scaleY = canvasH / wrapperRect.height;
-
-                const centerX = elRect.left + (elRect.width / 2);
-                const centerY = elRect.top + (elRect.height / 2);
-
-                const relativeX = centerX - wrapperRect.left;
-                const relativeY = centerY - wrapperRect.top;
-
-                const finalX = relativeX * scaleX;
-                const finalY = relativeY * scaleY;
-                const imgDrawW = elRect.width * scaleX;
-                const imgDrawH = elRect.height * scaleY;
-
-                tempCtx.drawImage(img, finalX - (imgDrawW / 2), finalY - (imgDrawH / 2), imgDrawW, imgDrawH);
+                tempCtx.drawImage(img, 0, 0, canvasW, canvasH);
             }
             
             currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); 
@@ -540,7 +519,6 @@
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
             liveControls.style.display = 'flex';
-            if(config.frameSrc) document.getElementById('overlay-controls').style.display = 'block';
         };
 
         // --- LOCAL STORAGE & DOWNLOAD ---
@@ -556,7 +534,7 @@
             document.getElementById('success-buttons').style.display = 'none';
 
             try {
-                // 1. Trigger Direct Download
+                // 1. Direct Download
                 const a = document.createElement('a');
                 a.href = currentPhotoDataUrl;
                 a.download = `PrimeDuo_${Date.now()}.jpg`;
@@ -564,11 +542,11 @@
                 a.click();
                 document.body.removeChild(a);
 
-                // 2. Save thumbnail to Local Storage (History)
+                // 2. Local Storage History
                 try {
                     let photos = JSON.parse(localStorage.getItem('savedPhotos') || '[]');
                     photos.push(currentPhotoDataUrl);
-                    if(photos.length > 10) photos.shift(); // Keep only latest 10
+                    if(photos.length > 10) photos.shift(); 
                     localStorage.setItem('savedPhotos', JSON.stringify(photos));
                 } catch(e) {
                     console.warn("Local storage full, skipped history update.");
