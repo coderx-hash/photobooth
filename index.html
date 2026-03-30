@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Prime Duo Photobooth PRO - DSLR Live View</title>
+    <title>Prime Duo Photobooth PRO</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;800;900&display=swap" rel="stylesheet">
     
@@ -110,11 +110,22 @@
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
         .btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5); transform: translateY(-3px); border-color: var(--danger);}
 
+        select.btn {
+            appearance: none;
+            -webkit-appearance: none;
+            text-align: center;
+            text-align-last: center;
+            outline: none;
+            cursor: pointer;
+        }
+        select.btn option { background: var(--bg-dark); color: var(--text-main); }
+
         /* --- RESPONSIVE CAMERA AREA --- */
         .camera-container { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 100%; }
         
         .live-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; width: 100%; justify-content: center; max-width: 900px; }
         .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 200px; }
+        #camera-select { flex: 2; max-width: 300px; } /* Ibinalik natin ang dropdown */
 
         .wrapper-container {
             width: 100%;
@@ -135,8 +146,8 @@
             aspect-ratio: 3 / 2;
         }
 
-        /* IN-UPDATE: Ang #camera natin ngayon ay image feed galing DSLR */
-        #camera { 
+        /* IN-UPDATE: Parehong naka object-fit cover ang video at img feed */
+        #camera-video, #camera-img { 
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%; 
             object-fit: cover; 
@@ -203,12 +214,17 @@
             
             <div class="live-controls" id="live-controls">
                 <button id="btn-rotate" class="btn btn-secondary" onclick="toggleOrientation()">🔄 Rotate</button>
+                <select id="camera-select" class="btn btn-secondary" onchange="changeCamera()">
+                    <option value="dslr">📸 DSLR (digiCamControl)</option>
+                </select>
                 <button class="btn btn-secondary" onclick="toggleMirror()">🪞 Mirror</button>
             </div>
 
             <div class="wrapper-container">
                 <div class="video-wrapper" id="vid-wrapper" style="--aspect-ratio: 3/2;">
-                    <img id="camera" alt="DSLR Live View will appear here" draggable="false">
+                    <video id="camera-video" playsinline autoplay style="display:none;"></video>
+                    <img id="camera-img" alt="DSLR Live View" draggable="false" style="display:none;">
+                    
                     <img id="live-overlay" class="frame-overlay" src="" draggable="false">
                     <div id="countdown" class="countdown-overlay">3</div>
                     <div id="flash" class="flash"></div>
@@ -255,12 +271,17 @@
     <script>
         // State variables
         window.config = { frameSrc: null, orientation: 'landscape' };
+        let streamActive = null;
         let currentPhotoDataUrl = null;
+        let currentDeviceId = 'dslr'; // Default to DSLR
+        let currentSourceType = 'dslr'; // 'dslr' o 'webcam'
         let isMirrored = false; 
         let currentRatio = 3/2; 
 
-        // Ang #camera natin ngayon ay isang IMG tag, hindi na VIDEO tag
-        const video = document.getElementById('camera'); 
+        // IN-UPDATE: Variables para sa parehong camera type
+        const videoEl = document.getElementById('camera-video'); 
+        const imgEl = document.getElementById('camera-img'); 
+        
         const vidWrapper = document.getElementById('vid-wrapper');
         const previewWrapper = document.getElementById('preview-wrapper');
         const overlayImg = document.getElementById('live-overlay');
@@ -271,6 +292,7 @@
         const flashEl = document.getElementById('flash');
         const boothControls = document.getElementById('booth-controls');
         const liveControls = document.getElementById('live-controls');
+        const cameraSelect = document.getElementById('camera-select');
         const btnRotate = document.getElementById('btn-rotate');
 
         function applyExactSize(ratio) {
@@ -350,11 +372,9 @@
         };
 
         function applyMirror() {
-            if (isMirrored) {
-                video.style.transform = "scaleX(-1) scale(1.0)";
-            } else {
-                video.style.transform = "scaleX(1) scale(1.0)";
-            }
+            const transformValue = isMirrored ? "scaleX(-1) scale(1.0)" : "scaleX(1) scale(1.0)";
+            videoEl.style.transform = transformValue;
+            imgEl.style.transform = transformValue;
         }
 
         window.toggleOrientation = () => {
@@ -366,14 +386,68 @@
             applyExactSize(ratio);
         };
 
+        // IN-UPDATE: Kinukuha ang mga Webcams at idinadagdag kasama ng DSLR option
+        async function getCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                cameraSelect.innerHTML = '<option value="dslr">📸 DSLR (digiCamControl)</option>';
+                
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = `📹 ${device.label || 'Webcam ' + (index + 1)}`;
+                    cameraSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.log("No webcams found or permissions denied.");
+            }
+
+            cameraSelect.value = currentDeviceId;
+        }
+
+        window.changeCamera = async () => {
+            currentDeviceId = cameraSelect.value;
+            await startVideoStream(currentDeviceId);
+        };
+
+        // IN-UPDATE: Logic para mag-switch sa pagitan ng DSLR Link at Laptop Webcam
+        async function startVideoStream(deviceId = 'dslr') {
+            // Patayin muna ang anumang tumatakbong webcam
+            if (streamActive) streamActive.getTracks().forEach(track => track.stop());
+
+            if (deviceId === 'dslr') {
+                currentSourceType = 'dslr';
+                videoEl.style.display = 'none';
+                imgEl.style.display = 'block';
+                imgEl.src = "http://127.0.0.1:5514/live";
+                applyMirror();
+            } else {
+                currentSourceType = 'webcam';
+                imgEl.style.display = 'none';
+                imgEl.src = ""; // Stop requesting DSLR stream
+                videoEl.style.display = 'block';
+
+                const constraints = { 
+                    video: { deviceId: { exact: deviceId }, width: { ideal: 3840 }, height: { ideal: 2160 } } 
+                };
+
+                try {
+                    streamActive = await navigator.mediaDevices.getUserMedia(constraints);
+                    videoEl.srcObject = streamActive;
+                    applyMirror();
+                } catch (err) { 
+                    alert("Camera access denied or unavailable. Please check browser permissions."); 
+                    console.error(err);
+                }
+            }
+        }
+
         window.openCamera = async () => {
             switchScreen('booth-screen');
             boothControls.style.display = 'flex';
             liveControls.style.display = 'flex';
-
-            // IN-UPDATE: Dito natin ilalagay ang Live View link ng digiCamControl
-            // Siguraduhing naka-ON ang Live View mode sa camera o sa digiCamControl app!
-            video.src = "http://127.0.0.1:5514/live";
 
             if (config.frameSrc) {
                 btnRotate.style.display = 'none'; 
@@ -396,11 +470,14 @@
                 const ratio = isLandscape ? 3/2 : 2/3;
                 applyExactSize(ratio); 
             }
+
+            await getCameras();
+            await startVideoStream(currentDeviceId);
         };
 
         window.endSession = () => {
-            // Patayin ang live stream preview para hindi mag-lag ang system
-            video.src = "";
+            if (streamActive) streamActive.getTracks().forEach(track => track.stop());
+            imgEl.src = ""; // Stop DSLR stream to save memory
             switchScreen('setup-screen');
         };
 
@@ -411,13 +488,11 @@
             countdownEl.style.opacity = '0';
             flashEl.style.opacity = '1';
             
-            // Dito uutusan ang Node.js Server (Port 3000) na mag-trigger sa Port 5514
+            // Kahit anong camera ang gamit sa screen, ipi-trigger pa rin ang DSLR para sa backup HQ photo
             fetch('http://localhost:3000/shoot')
                 .then(response => response.json())
                 .then(data => {
-                    if(data.success) {
-                        console.log("✅ Camera & Flash triggered successfully!");
-                    }
+                    if(data.success) console.log("✅ Camera & Flash triggered successfully!");
                 })
                 .catch(err => console.error("❌ Server not running or error:", err));
 
@@ -439,7 +514,6 @@
                 canvasH = img.naturalHeight;
             } else {
                 const isLandscape = config.orientation === 'landscape';
-                
                 if (isLandscape) {
                     canvasW = 3840;
                     canvasH = Math.round(3840 / currentRatio);
@@ -452,13 +526,14 @@
             tempCanvas.width = canvasW;
             tempCanvas.height = canvasH;
             
-            // IN-UPDATE: Para sa <img> tag, gagamitin natin ang naturalWidth imbes na videoWidth
-            const videoW = video.naturalWidth || 1920;
-            const videoH = video.naturalHeight || 1080;
+            // IN-UPDATE: Kinukuha ang tamang width/height depende kung WebCam o DSLR ang gamit
+            const activeSource = currentSourceType === 'dslr' ? imgEl : videoEl;
+            const sourceW = currentSourceType === 'dslr' ? (imgEl.naturalWidth || 1920) : videoEl.videoWidth;
+            const sourceH = currentSourceType === 'dslr' ? (imgEl.naturalHeight || 1080) : videoEl.videoHeight;
             
-            const scale = Math.max(canvasW / videoW, canvasH / videoH);
-            const drawW = videoW * scale;
-            const drawH = videoH * scale;
+            const scale = Math.max(canvasW / sourceW, canvasH / sourceH);
+            const drawW = sourceW * scale;
+            const drawH = sourceH * scale;
             const startX = (canvasW - drawW) / 2;
             const startY = (canvasH - drawH) / 2;
 
@@ -468,7 +543,8 @@
                 tempCtx.scale(-1, 1);
             }
             
-            tempCtx.drawImage(video, startX, startY, drawW, drawH);
+            // Ido-draw ang kung anuman ang active camera sa screen
+            tempCtx.drawImage(activeSource, startX, startY, drawW, drawH);
             tempCtx.restore();
 
             if (config.frameSrc) {
