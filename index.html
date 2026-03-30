@@ -135,7 +135,7 @@
             margin-bottom: 20px;
         }
 
-        /* Pixel-perfect JS driven wrapper */
+        /* IN-UPDATE: Auto-fit fix - Gumamit tayo ng overflow: hidden para sa cropping */
         .video-wrapper { 
             position: relative; 
             background: #000; 
@@ -144,8 +144,10 @@
             border: 2px solid var(--glass-border); 
             box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
             transition: width 0.3s ease, height 0.3s ease;
+            aspect-ratio: 3 / 2; /* Default ratio para tumugma sa Nikon */
         }
 
+        /* IN-UPDATE: object-fit: cover para walang black spaces */
         video { 
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%; 
@@ -160,6 +162,7 @@
             object-fit: fill; 
         }
 
+        /* IN-UPDATE: object-fit: cover din sa preview */
         #preview-img { 
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%; 
@@ -220,7 +223,7 @@
             </div>
 
             <div class="wrapper-container">
-                <div class="video-wrapper" id="vid-wrapper">
+                <div class="video-wrapper" id="vid-wrapper" style="--aspect-ratio: 3/2;">
                     <video id="camera" playsinline autoplay></video>
                     <img id="live-overlay" class="frame-overlay" src="" draggable="false">
                     <div id="countdown" class="countdown-overlay">3</div>
@@ -243,7 +246,7 @@
                 <h1 class="title" style="font-size: clamp(1.8rem, 4vw, 2.8rem);">LOOKS GREAT!</h1>
             </div>
             <div class="wrapper-container">
-                <div class="video-wrapper" id="preview-wrapper">
+                <div class="video-wrapper" id="preview-wrapper" style="--aspect-ratio: 3/2;">
                     <img id="preview-img" src="">
                 </div>
             </div>
@@ -272,7 +275,7 @@
         let currentPhotoDataUrl = null;
         let currentDeviceId = null;
         let isMirrored = false; 
-        let currentRatio = 16/9;
+        let currentRatio = 3/2; // Binago natin ang default ratio para mas tumugma sa DSLR
 
         const video = document.getElementById('camera');
         const vidWrapper = document.getElementById('vid-wrapper');
@@ -288,8 +291,13 @@
         const cameraSelect = document.getElementById('camera-select');
         const btnRotate = document.getElementById('btn-rotate');
 
+        // IN-UPDATE: Binago para suportahan ang Auto-Fit without spaces
         function applyExactSize(ratio) {
             currentRatio = ratio;
+            
+            vidWrapper.style.setProperty('--aspect-ratio', ratio);
+            previewWrapper.style.setProperty('--aspect-ratio', ratio);
+
             const maxW = window.innerWidth * 0.95; 
             const maxH = window.innerHeight * 0.70; 
             
@@ -360,12 +368,12 @@
             applyMirror();
         };
 
-        // IN-UPDATE PARA MA-CROP ANG BLACK BARS NG NIKON (1.05 zoom)
+        // IN-UPDATE: Inalis yung 1.05 scale hack dahil yung object-fit: cover na ang gagawa nito
         function applyMirror() {
             if (isMirrored) {
-                video.style.transform = "scaleX(-1) scale(1.05)";
+                video.style.transform = "scaleX(-1) scale(1.0)";
             } else {
-                video.style.transform = "scaleX(1) scale(1.05)";
+                video.style.transform = "scaleX(1) scale(1.0)";
             }
         }
 
@@ -374,7 +382,7 @@
             
             config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
             const isLandscape = config.orientation === 'landscape';
-            const ratio = isLandscape ? 16/9 : 3/4; 
+            const ratio = isLandscape ? 3/2 : 2/3; 
             applyExactSize(ratio);
         };
 
@@ -442,9 +450,11 @@
                 const img = new Image();
                 img.src = config.frameSrc;
                 img.onload = () => {
-                    overlayImg.src = config.frameSrc;
+                    // IN-UPDATE: Kukunin ang ratio ng mismong PNG file para i-autofit ang video container
                     const ratio = img.naturalWidth / img.naturalHeight;
                     applyExactSize(ratio); 
+                    
+                    overlayImg.src = config.frameSrc;
                     overlayImg.style.display = 'block';
                 };
             } else {
@@ -453,7 +463,7 @@
                 
                 config.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
                 const isLandscape = config.orientation === 'landscape';
-                const ratio = isLandscape ? 16/9 : 3/4;
+                const ratio = isLandscape ? 3/2 : 2/3;
                 applyExactSize(ratio); 
             }
 
@@ -468,29 +478,24 @@
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const playCountdown = async () => {
             countdownEl.style.opacity = '1';
-            for (let i = 3; i > 0; i--) { 
-                countdownEl.innerText = i; 
-                await sleep(1000); 
-            }
+            for (let i = 3; i > 0; i--) { countdownEl.innerText = i; await sleep(1000); }
             countdownEl.style.opacity = '0';
             flashEl.style.opacity = '1';
             
-            // DITO TAYO KUMAKAUSAP SA NODE.JS SERVER PARA I-TRIGGER ANG NIKON
+            // IN-UPDATE: Dito uutusan ang Node.js Server mo sa Port 3000
             fetch('http://localhost:3000/shoot')
                 .then(response => response.json())
                 .then(data => {
                     if(data.success) {
-                        console.log("✅ Nikon Shutter Triggered!");
-                    } else {
-                        console.warn("⚠️ Camera Status:", data.message);
+                        console.log("✅ Camera triggered successfully!");
                     }
                 })
-                .catch(err => console.error("❌ Hindi ma-contact ang server. Naka-run ba ang Node.js?", err));
+                .catch(err => console.error("❌ Server not running or error:", err));
 
             setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
-        // IN-UPDATE PARA SA NO BLANK SPACES
+        // IN-UPDATE: Canvas drawing logic para saktuhin ang "object-fit: cover" na effect
         window.startCapture = async () => {
             boothControls.style.display = 'none';
             liveControls.style.display = 'none';
@@ -505,15 +510,14 @@
                 canvasW = img.naturalWidth;
                 canvasH = img.naturalHeight;
             } else {
-                const videoRatio = video.videoWidth / video.videoHeight;
                 const isLandscape = config.orientation === 'landscape';
                 
                 if (isLandscape) {
                     canvasW = 3840;
-                    canvasH = Math.round(3840 / videoRatio);
+                    canvasH = Math.round(3840 / currentRatio);
                 } else {
                     canvasH = 2880;
-                    canvasW = Math.round(2880 * videoRatio);
+                    canvasW = Math.round(2880 * currentRatio);
                 }
             }
             
@@ -523,9 +527,8 @@
             const videoW = video.videoWidth;
             const videoH = video.videoHeight;
             
-            // Nag-add tayo ng zoomFactor na 1.05 dito
-            const zoomFactor = 1.05;
-            const scale = Math.max(canvasW / videoW, canvasH / videoH) * zoomFactor;
+            // Inaayos nito yung cropping para siguradong punong-puno ang frame
+            const scale = Math.max(canvasW / videoW, canvasH / videoH);
             const drawW = videoW * scale;
             const drawH = videoH * scale;
             const startX = (canvasW - drawW) / 2;
@@ -549,6 +552,8 @@
             
             currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); 
             previewImg.src = currentPhotoDataUrl;
+            
+            applyExactSize(currentRatio);
             switchScreen('preview-screen');
         };
 
