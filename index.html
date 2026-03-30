@@ -468,18 +468,24 @@
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const playCountdown = async () => {
             countdownEl.style.opacity = '1';
-            for (let i = 3; i > 0; i--) { countdownEl.innerText = i; await sleep(1000); }
+            for (let i = 3; i > 0; i--) { 
+                countdownEl.innerText = i; 
+                await sleep(1000); 
+            }
             countdownEl.style.opacity = '0';
             flashEl.style.opacity = '1';
             
             // DITO TAYO KUMAKAUSAP SA NODE.JS SERVER PARA I-TRIGGER ANG NIKON
-            try {
-                fetch('http://localhost:3000/shoot')
-                    .then(response => console.log("Camera triggered!"))
-                    .catch(err => console.log("Server not running or error: ", err));
-            } catch (e) {
-                console.log("Fetch failed");
-            }
+            fetch('http://localhost:3000/shoot')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        console.log("✅ Nikon Shutter Triggered!");
+                    } else {
+                        console.warn("⚠️ Camera Status:", data.message);
+                    }
+                })
+                .catch(err => console.error("❌ Hindi ma-contact ang server. Naka-run ba ang Node.js?", err));
 
             setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
