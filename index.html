@@ -125,7 +125,7 @@
         
         .live-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; width: 100%; justify-content: center; max-width: 900px; }
         .live-controls .btn { padding: 12px 20px; font-size: 0.85rem; width: auto; flex: 1; max-width: 200px; }
-        #camera-select { flex: 2; max-width: 300px; } /* Ibinalik natin ang dropdown */
+        #camera-select { flex: 2; max-width: 300px; }
 
         .wrapper-container {
             width: 100%;
@@ -146,12 +146,12 @@
             aspect-ratio: 3 / 2;
         }
 
-        /* IN-UPDATE: Parehong naka object-fit cover ang video at img feed */
         #camera-video, #camera-img { 
             position: absolute; top: 0; left: 0; 
             width: 100%; height: 100%; 
             object-fit: cover; 
             transition: transform 0.3s; 
+            will-change: transform;
         }
         
         .frame-overlay { 
@@ -273,21 +273,19 @@
         window.config = { frameSrc: null, orientation: 'landscape' };
         let streamActive = null;
         let currentPhotoDataUrl = null;
-        let currentDeviceId = 'dslr'; // Default to DSLR
-        let currentSourceType = 'dslr'; // 'dslr' o 'webcam'
+        let currentDeviceId = 'dslr'; 
+        let currentSourceType = 'dslr'; 
         let isMirrored = false; 
         let currentRatio = 3/2; 
 
-        // IN-UPDATE: Variables para sa parehong camera type
         const videoEl = document.getElementById('camera-video'); 
         const imgEl = document.getElementById('camera-img'); 
-        
         const vidWrapper = document.getElementById('vid-wrapper');
         const previewWrapper = document.getElementById('preview-wrapper');
         const overlayImg = document.getElementById('live-overlay');
         const previewImg = document.getElementById('preview-img');
         const tempCanvas = document.getElementById('tempCanvas');
-        const tempCtx = tempCanvas.getContext('2d');
+        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
         const countdownEl = document.getElementById('countdown');
         const flashEl = document.getElementById('flash');
         const boothControls = document.getElementById('booth-controls');
@@ -295,9 +293,10 @@
         const cameraSelect = document.getElementById('camera-select');
         const btnRotate = document.getElementById('btn-rotate');
 
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
         function applyExactSize(ratio) {
             currentRatio = ratio;
-            
             vidWrapper.style.setProperty('--aspect-ratio', ratio);
             previewWrapper.style.setProperty('--aspect-ratio', ratio);
 
@@ -305,7 +304,6 @@
             const maxH = window.innerHeight * 0.70; 
             
             let finalW, finalH;
-            
             if (maxW / maxH > ratio) {
                 finalH = maxH;
                 finalW = finalH * ratio;
@@ -379,14 +377,12 @@
 
         window.toggleOrientation = () => {
             if (config.frameSrc) return; 
-            
             config.orientation = config.orientation === 'landscape' ? 'portrait' : 'landscape';
             const isLandscape = config.orientation === 'landscape';
             const ratio = isLandscape ? 3/2 : 2/3; 
             applyExactSize(ratio);
         };
 
-        // IN-UPDATE: Kinukuha ang mga Webcams at idinadagdag kasama ng DSLR option
         async function getCameras() {
             try {
                 const devices = await navigator.mediaDevices.enumerateDevices();
@@ -403,7 +399,6 @@
             } catch (err) {
                 console.log("No webcams found or permissions denied.");
             }
-
             cameraSelect.value = currentDeviceId;
         }
 
@@ -412,25 +407,24 @@
             await startVideoStream(currentDeviceId);
         };
 
-        // IN-UPDATE: Logic para mag-switch sa pagitan ng DSLR Link at Laptop Webcam
         async function startVideoStream(deviceId = 'dslr') {
-            // Patayin muna ang anumang tumatakbong webcam
             if (streamActive) streamActive.getTracks().forEach(track => track.stop());
 
             if (deviceId === 'dslr') {
                 currentSourceType = 'dslr';
                 videoEl.style.display = 'none';
                 imgEl.style.display = 'block';
+                // Load MJPEG stream directly for optimized DSLR live view
                 imgEl.src = "http://127.0.0.1:5514/live";
                 applyMirror();
             } else {
                 currentSourceType = 'webcam';
                 imgEl.style.display = 'none';
-                imgEl.src = ""; // Stop requesting DSLR stream
+                imgEl.src = ""; 
                 videoEl.style.display = 'block';
 
                 const constraints = { 
-                    video: { deviceId: { exact: deviceId }, width: { ideal: 3840 }, height: { ideal: 2160 } } 
+                    video: { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } } 
                 };
 
                 try {
@@ -438,8 +432,7 @@
                     videoEl.srcObject = streamActive;
                     applyMirror();
                 } catch (err) { 
-                    alert("Camera access denied or unavailable. Please check browser permissions."); 
-                    console.error(err);
+                    alert("Camera access denied or unavailable."); 
                 }
             }
         }
@@ -451,20 +444,17 @@
 
             if (config.frameSrc) {
                 btnRotate.style.display = 'none'; 
-                
                 const img = new Image();
                 img.src = config.frameSrc;
                 img.onload = () => {
                     const ratio = img.naturalWidth / img.naturalHeight;
                     applyExactSize(ratio); 
-                    
                     overlayImg.src = config.frameSrc;
                     overlayImg.style.display = 'block';
                 };
             } else {
                 overlayImg.style.display = 'none';
                 btnRotate.style.display = 'inline-block'; 
-                
                 config.orientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
                 const isLandscape = config.orientation === 'landscape';
                 const ratio = isLandscape ? 3/2 : 2/3;
@@ -477,32 +467,31 @@
 
         window.endSession = () => {
             if (streamActive) streamActive.getTracks().forEach(track => track.stop());
-            imgEl.src = ""; // Stop DSLR stream to save memory
+            imgEl.src = ""; 
             switchScreen('setup-screen');
-        };
-
-        const sleep = ms => new Promise(r => setTimeout(r, ms));
-        const playCountdown = async () => {
-            countdownEl.style.opacity = '1';
-            for (let i = 3; i > 0; i--) { countdownEl.innerText = i; await sleep(1000); }
-            countdownEl.style.opacity = '0';
-            flashEl.style.opacity = '1';
-            
-            // Kahit anong camera ang gamit sa screen, ipi-trigger pa rin ang DSLR para sa backup HQ photo
-            fetch('http://localhost:3000/shoot')
-                .then(response => response.json())
-                .then(data => {
-                    if(data.success) console.log("✅ Camera & Flash triggered successfully!");
-                })
-                .catch(err => console.error("❌ Server not running or error:", err));
-
-            setTimeout(() => { flashEl.style.opacity = '0'; }, 150);
         };
 
         window.startCapture = async () => {
             boothControls.style.display = 'none';
             liveControls.style.display = 'none';
-            await playCountdown();
+            
+            countdownEl.style.opacity = '1';
+            for (let i = 3; i > 0; i--) { 
+                countdownEl.innerText = i; 
+                await sleep(1000); 
+            }
+            countdownEl.style.opacity = '0';
+            
+            // Screen Flash UI
+            flashEl.style.opacity = '1';
+            
+            // Trigger DSLR server
+            fetch('http://localhost:3000/shoot')
+                .then(response => response.json())
+                .catch(err => console.error("DSLR Server Error:", err));
+
+            // Wait 400ms for mechanical flash to sync before taking canvas snapshot
+            await sleep(400); 
             
             let canvasW, canvasH;
 
@@ -515,18 +504,17 @@
             } else {
                 const isLandscape = config.orientation === 'landscape';
                 if (isLandscape) {
-                    canvasW = 3840;
-                    canvasH = Math.round(3840 / currentRatio);
+                    canvasW = 1920;
+                    canvasH = Math.round(1920 / currentRatio);
                 } else {
-                    canvasH = 2880;
-                    canvasW = Math.round(2880 * currentRatio);
+                    canvasH = 1920;
+                    canvasW = Math.round(1920 * currentRatio);
                 }
             }
             
             tempCanvas.width = canvasW;
             tempCanvas.height = canvasH;
             
-            // IN-UPDATE: Kinukuha ang tamang width/height depende kung WebCam o DSLR ang gamit
             const activeSource = currentSourceType === 'dslr' ? imgEl : videoEl;
             const sourceW = currentSourceType === 'dslr' ? (imgEl.naturalWidth || 1920) : videoEl.videoWidth;
             const sourceH = currentSourceType === 'dslr' ? (imgEl.naturalHeight || 1080) : videoEl.videoHeight;
@@ -543,7 +531,6 @@
                 tempCtx.scale(-1, 1);
             }
             
-            // Ido-draw ang kung anuman ang active camera sa screen
             tempCtx.drawImage(activeSource, startX, startY, drawW, drawH);
             tempCtx.restore();
 
@@ -554,8 +541,11 @@
                 tempCtx.drawImage(img, 0, 0, canvasW, canvasH);
             }
             
-            currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 1.0); 
+            // Generate snapshot URL efficiently
+            currentPhotoDataUrl = tempCanvas.toDataURL('image/jpeg', 0.9); 
             previewImg.src = currentPhotoDataUrl;
+            
+            flashEl.style.opacity = '0';
             
             applyExactSize(currentRatio);
             switchScreen('preview-screen');
